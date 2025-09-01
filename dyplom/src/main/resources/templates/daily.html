@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <title>Lista zleceń</title>
+  <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
+  <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+  <link rel="stylesheet" href="/static/fonts/font-awesome.min.css">
+  <link rel="stylesheet" href="/static/fonts/fontawesome5-overrides.min.css">
+  <link rel="stylesheet" href="/static/css/animate.min.css">
+  <link rel="stylesheet" href="/static/css/Add-Another-Button.css">
+  <link rel="stylesheet" href="/static/css/Bootstrap-Calendar.css">
+  <link rel="stylesheet" href="/static/css/Box-panels-box-panel.css">
+  <link rel="stylesheet" href="/static/css/Box-panels.css">
+  <link rel="stylesheet" href="/static/css/Navbar-With-Button-icons.css">
+  <link rel="stylesheet" href="/static/css/Table-With-Search-search-table.css">
+  <link rel="stylesheet" href="/static/css/Table-With-Search.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" />
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+</head>
+<style>
+  #calendar .fc-event {
+    margin-left: 5px;
+    margin-bottom: 5px;
+  }
+
+  #calendar .fc-title {
+    font-size: min(4vh, 15px);
+    color: #455663;
+  }
+  .red-text {
+    color: red;
+  }
+  #materialList {
+    text-align: left;
+  }
+  #materialList-edit {
+    text-align: left;
+  }
+   #calendar .fc-scroller {
+     overflow-y: hidden !important;
+   }
+
+</style>
+
+<body id="page-top" >
+<div id="wrapper">
+  <div class="d-flex flex-column" id="content-wrapper">
+    <div id="content" style="text-align: center;font-family: ABeeZee, sans-serif;font-size: 18px;">
+      <nav class="navbar navbar-light navbar-expand-md sticky-top bg-dark shadow mb-4 topbar static-top" style="background: var(--bs-dark);">
+        <div class="container-fluid"><button class="btn btn-link d-md-none rounded-circle me-3" id="sidebarToggleTop" type="button"><i class="fas fa-bars"></i></button><span></span><a class="navbar-brand" href="#" style="font-size: 30px;color:  var(--bs-orange);">Zakład krawiecki</a>
+          <div class="collapse navbar-collapse">
+            <ul class="navbar-nav">
+              <div th:if="${#authorization.expression('hasAnyRole(''ROLE_ADMIN'')')}">
+                <li class="nav-item"><a class="nav-link active" href="http://localhost:8080/panel_administratora">Panel administratora</a></li>
+              </div>
+              <li class="nav-item"><a class="nav-link" href="http://localhost:8080/employeeChat">Panel wiadomości</a></li>
+              <li class="nav-item"><a class="nav-link" href="http://localhost:8080/price_list">Cennik</a></li>
+              <li class="nav-item"><a class="nav-link" href="http://localhost:8080/materials">Materiały</a></li>
+            </ul>
+          </div><button data-bs-target="#" data-bs-toggle="collapse" class="navbar-toggler"></button>
+          <form class="d-none d-sm-inline-block me-auto ms-md-3 my-2 my-md-0 mw-100 navbar-search">
+            <div class="input-group"></div>
+          </form>
+          <ul class="navbar-nav flex-nowrap ms-auto">
+            <li class="nav-item dropdown d-sm-none no-arrow"><a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#"><i class="fas fa-search"></i></a>
+              <div class="dropdown-menu dropdown-menu-end p-3 animated--grow-in" aria-labelledby="searchDropdown">
+                <form class="me-auto navbar-search w-100">
+                  <div class="input-group"><input class="bg-light form-control border-0 small" type="text" placeholder="Search for ...">
+                    <div class="input-group-append"><button class="btn btn-primary py-0" type="button"><i class="fas fa-search"></i></button></div>
+                  </div>
+                </form>
+              </div>
+            </li>
+            <li class="nav-item dropdown no-arrow mx-1">
+              <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#"><span id="alertamount" class="badge bg-danger badge-counter">3+</span><i class="fas fa-bell fa-fw"></i></a>
+                <div style="height: 650px; overflow: auto;" id="notification" class="dropdown-menu dropdown-menu-end dropdown-list animated--grow-in">
+                  <h6 class="dropdown-header">Powiadomienia</h6><a class="dropdown-item text-center small text-gray-500" onclick="deleteAlerts()" href="#">Usuń wszystkie powiadomienia</a>
+                </div>
+              </div>
+            </li>
+            <div class="d-none d-sm-block topbar-divider"></div>
+            <li class="nav-item dropdown no-arrow">
+              <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#"><span id="user" class="d-none d-lg-inline me-2 text-gray-600 small"></span><img class="border rounded-circle img-profile" src="/static/img/avatars/avatar1.png"></a>
+                <div class="dropdown-menu shadow dropdown-menu-end animated--grow-in"><a class="dropdown-item" href="/profile"><i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Profil</a>
+                  <div class="dropdown-divider"></div><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Wyloguj</a>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </nav>
+       <div class="container" style="width: 100%;text-align: center;margin-bottom: 2%;"><button class="btn btn-outline-primary text-truncate float-none float-sm-none add-another-btn" data-bss-hover-animate="pulse" type="button" style="text-align: center;" data-bs-target="#modal-2" data-bs-toggle="modal">Dodaj zlecenie<i class="fas fa-plus-circle edit-icon"></i></button></div>
+      <input type="checkbox" id="showInProgress" /> Pokaż tylko "W trakcie"
+      <div class="modal fade" role="dialog" tabindex="-1" id="modal-edit">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <form id="editForm">
+              <div class="modal-header">
+                <h4 class="modal-title">Przeglądaj i edytuj zlecenia.</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Opis</span>
+                  <input class="form-control" type="text" name="description-edit" style="margin-bottom: 10px;" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Klient</span>
+                  <input class="form-control" type="text" name="clientName-edit" style="margin-bottom: 10px;" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">E-mail</span>
+                  <input class="form-control" type="email" name="email-edit" style="margin-bottom: 10px;" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$">
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Numer telefonu</span>
+                  <input class="form-control" type="tel" name="phoneNumber-edit" style="margin-bottom: 10px;" pattern="[0-9]{9}">
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Czas trwania</span>
+                  <input type="number" step="0.5" min="0" id="hours-edit" name="hours-edit" style="margin-bottom: 10px;" required>
+                  <button id="checkAvailabilityBtn-edit" class="btn btn-primary" type="button" style="margin-bottom: 10px;">Przełóż zlecenie</button>
+                  <button id="checkAvailabilityBtn2-edit"  class="btn btn-primary" type="button" style="margin-bottom: 10px; margin-left: 10px;">Przenieś na innego pracownika</button>
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Data</span>
+                  <input class="form-control" type="date" name="startDate-edit" id="startDate-edit" style="margin-bottom: 10px;" required>
+                  <input class="form-control" type="time" name="startTime-edit" id="startTime-edit" style="margin-bottom: 10px;" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Data</span>
+                  <input class="form-control" type="date" name="endDate-edit" id="endDate-edit" style="margin-bottom: 10px;" required>
+                  <input class="form-control" type="time" name="endTime-edit" id="endTime-edit" style="margin-bottom: 10px;" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Pracownik</span>
+                  <input class="form-control" type="text" id="selectedUser-edit" style="margin-bottom: 10px;" disabled />
+                  <div class="dropdown" >
+                    <button class="btn btn-primary dropdown-toggle rounded-0 rounded-end" aria-expanded="false" data-bs-toggle="dropdown" type="button">Wybierz użytkownika </button>
+                    <div class="dropdown-menu" id="userDropdown-edit"></div>
+                  </div>
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Cena</span>
+                  <input class="form-control" type="number" name="price-edit" style="margin-bottom: 10px;" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 3%;">Status</span>
+                  <div class="dropdown" style="margin-bottom: 3%;">
+                    <button class="btn btn-primary dropdown-toggle rounded-0 rounded-end" aria-expanded="false" data-bs-toggle="dropdown" type="button" id="statusDropdownButton">
+                      <span class="status-text">Wybierz status</span>
+                    </button>
+                    <div class="dropdown-menu" id="statusDropdown-edit">
+                      <a class="dropdown-item" href="#" data-value="W trakcie">W trakcie</a>
+                      <a class="dropdown-item" href="#" data-value="Gotowe">Gotowe</a>
+                      <a class="dropdown-item" href="#" data-value="Wydane">Wydane</a>
+                    </div>
+
+                  </div>
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Materiały</span>
+                  <input id="materialInput-edit" class="form-control" type="text" name="materials-edit" style="margin-bottom: 10px;">
+                  <button id="addMaterialBtn-edit" class="btn btn-primary" type="button" style="margin-bottom: 10px;">Dodaj</button>
+                </div>
+                <ul id="materialList-edit"></ul>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-light" type="button" data-bs-dismiss="modal">Zamknij</button>
+                <button class="btn btn-danger" type="button" data-bs-toggle="modal" data-bs-target="#modal-3">Usuń zlecenie</button>
+                <button class="btn btn-primary" type="submit" data-bs-dismiss="modal">Zapisz zmiany</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <h1></h1>
+      <div class="modal fade" role="dialog" tabindex="-1" id="modal-2">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <form id="orderForm"> <!-- Added form element with an id -->
+              <div class="modal-header">
+                <h4 class="modal-title">Dodaj zlecenie</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Opis</span>
+                  <input class="form-control" type="text" name="description" style="margin-bottom: 10px;" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Klient</span>
+                  <input class="form-control" type="text" name="clientName" style="margin-bottom: 10px;" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">E-mail</span>
+                  <input class="form-control" type="email" name="email" style="margin-bottom: 10px;" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$">
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Numer telefonu</span>
+                  <input class="form-control" type="tel" name="phoneNumber" style="margin-bottom: 10px;" pattern="[0-9]{9}">
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Czas trwania</span>
+                  <input type="number" step="0.5" min="0" id="hours" name="hours" style="margin-bottom: 10px;" required>
+                  <button id="checkAvailabilityBtn" class="btn btn-primary" type="button" style="margin-bottom: 10px;">Terminy</button>
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Data</span>
+                  <input class="form-control" type="date" name="startDate" id="startDate" style="margin-bottom: 10px;" required>
+                  <input class="form-control" type="time" name="startTime" id="startTime" style="margin-bottom: 10px;" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Data</span>
+
+                  <input class="form-control" type="date" name="endDate" id="endDate" style="margin-bottom: 10px;" required>
+                  <input class="form-control" type="time" name="endTime" id="endTime" style="margin-bottom: 10px;" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Pracownik</span>
+                  <input class="form-control" type="text" id="selectedUser" style="margin-bottom: 10px;" disabled />
+                  <div class="dropdown" style="margin-bottom: 10px;">
+                    <button class="btn btn-primary dropdown-toggle rounded-0 rounded-end" aria-expanded="false" data-bs-toggle="dropdown" type="button">Wybierz użytkownika </button>
+                    <div class="dropdown-menu" id="userDropdown"></div>
+                  </div>
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Cena</span>
+                  <input class="form-control" type="number" name="price" style="margin-bottom: 10px;" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 3%;">
+                  <span class="input-group-text" style="margin-bottom: 10px;">Materiały</span>
+                  <input id="materialInput" class="form-control" type="text" name="materials" style="margin-bottom: 10px;">
+                  <button id="addMaterialBtn" class="btn btn-primary" type="button" style="margin-bottom: 10px;">Dodaj</button>
+                </div>
+                <ul id="materialList" ></ul>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-light" type="button" data-bs-dismiss="modal">Zamknij</button>
+                <button class="btn btn-primary" type="submit" data-bs-dismiss="modal">Zapisz</button> <!-- Changed to submit button -->
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="container" style="border-style: none;border-color: var(--bs-dark);border-top: 1px none var(--bs-gray-700) ;border-bottom: 2px solid var(--bs-gray-600) ;">
+        <div class="modal fade" role="dialog" tabindex="-1" id="modal-3">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Czy na pewno chcesz usunąć zlecenie?</h4><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <p>Zmiana jest nieodwracalna.</p>
+              </div>
+              <div class="modal-footer d-xxl-flex justify-content-xxl-center"><button class="btn btn-light d-xxl-flex" type="button" data-bs-dismiss="modal">Nie</button><button class="btn btn-primary" type="button" data-bs-dismiss="modal" onclick="handleConfirmDelete()">Tak</button></div>
+            </div>
+          </div>
+        </div>
+
+                </div>
+      <div class="table-responsive" style="margin-top: 19px;">
+        <div id="calendar"></div>
+      </div>
+    </div>
+  </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+</div>
+<script src="/static/bootstrap/js/bootstrap.min.js"></script>
+<script src="/static/js/bs-init.js"></script>
+<script src="/static/js/Table-With-Search.js"></script>
+<script src="/static/js/theme.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="/static/js/moment.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.32/moment-timezone.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/locale/pl.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+
+</body>
+
+<script>
+  var currentOrderId;
+  var globalStatus;
+</script>
+<script>
+  $.get("/user", function(data) {
+    $("#user").html(data.name);
+    for(let i=data.notifications.length-1;i>=0;i--){
+      var t = `<a class="dropdown-item d-flex align-items-center" href="#">
+                                            <div class="me-3">
+                                                <div class="bg-warning icon-circle"><i class="fas fa-exclamation-triangle text-white"></i></div>
+                                            </div>
+                                            <div><span class="small text-gray-500">`+data.notifications[i].creator + " " +data.notifications[i].date+`</span>
+                                                <p>`+data.notifications[i].description+`</p>
+                                            </div>
+                                        </a>`
+
+      $('#notification').append(t)
+    }
+    $('#alertamount').text(data.notifications.length);
+  });
+</script>
+
+<script>
+  $(document).ready(function () {
+    $("#orderForm").on("submit", function (event) {
+      event.preventDefault();
+
+      var description = $("input[name='description']").val();
+      var clientName = $("input[name='clientName']").val();
+      var email = $("input[name='email']").val();
+      var phoneNumber = $("input[name='phoneNumber']").val();
+      var price = $("input[name='price']").val();
+      var materials = [];
+
+      $("#materialList li").each(function () {
+        materials.push($(this).text());
+      });
+
+      var startDate = document.getElementById('startDate').value;
+      var startTime = document.getElementById('startTime').value;
+      var endDate = document.getElementById('endDate').value;
+      var endTime = document.getElementById('endTime').value;
+
+      var combinedStartDateTimeString = startDate + ' ' + startTime + ':00';
+      var combinedEndDateTimeString = endDate + ' ' + endTime + ':00';
+
+      var combinedStartDateTime = moment.tz(combinedStartDateTimeString, 'YYYY-MM-DD HH:mm', 'Europe/Warsaw');
+      var combinedEndDateTime = moment.tz(combinedEndDateTimeString, 'YYYY-MM-DD HH:mm', 'Europe/Warsaw');
+
+      var formattedStartDateTime = combinedStartDateTime.format('YYYY-MM-DD HH:mm:ss');
+      var formattedEndDateTime = combinedEndDateTime.format('YYYY-MM-DD HH:mm:ss');
+
+      var hours = $("#hours").val();
+      var selectedUser = $("#selectedUser").val();
+
+      $.ajax({
+        type: "POST",
+        url: "/order/add",
+        contentType: "application/json",
+        data: JSON.stringify({
+          description: description,
+          clientName: clientName,
+          email: email,
+          phoneNumber: phoneNumber,
+          startDate: formattedStartDateTime,
+          endDate: formattedEndDateTime,
+          price: price,
+          items: materials,
+          hours: hours,
+          selectedUser: selectedUser
+        }),
+        success: function (response) {
+          generatePdf(response);
+          $('#calendar').fullCalendar('refetchEvents');
+
+        },
+        error: function (error) {
+          console.error(error);
+          alert("Wystąpił błąd podczas dodawania zamówienia.");
+        }
+      });
+    });
+  });
+  function generatePdf(orderDetails) {
+    window.jsPDF = window.jspdf.jsPDF;
+    var pdf = new jsPDF();
+    pdf.text("Zaklad krawiecki", 10, 10);
+    pdf.text("Opis: " + orderDetails.description + ".", 10, 20);
+    pdf.text("Klient: " + orderDetails.clientName + ".", 10, 30);
+    pdf.text("Koszt uslugi: " + orderDetails.price + " zl.", 10, 40);
+    pdf.text("Kod: " + orderDetails.idCode, 10, 50);
+    pdf.output("dataurlnewwindow");
+  }
+</script>
+
+<script>
+  $(document).ready(function () {
+    var materialList = $("#materialList");
+
+    materialList.on("click", "li", function () {
+      $(this).remove();
+    });
+
+    $("#addMaterialBtn").on("click", function () {
+      var materialInput = $("#materialInput");
+      var materialValue = materialInput.val();
+
+      if (materialValue && materialValue.trim() !== "") {
+        var listItem = $("<li>" + materialValue + "</li>");
+
+        materialList.append(listItem);
+
+        materialInput.val("");
+      }
+    });
+  });
+</script>
+<script>
+  $(document).ready(function () {
+    var materialListEdit = $("#materialList-edit");
+
+    materialListEdit.on("click", "li", function () {
+      $(this).remove();
+    });
+
+    $("#addMaterialBtn-edit").on("click", function () {
+      var materialInputEdit = $("#materialInput-edit");
+      var materialValueEdit = materialInputEdit.val();
+
+      if (materialValueEdit && materialValueEdit.trim() !== "") {
+        var listItem = $("<li>" + materialValueEdit + "</li>");
+
+        materialListEdit.append(listItem);
+
+        materialInputEdit.val("");
+      }
+    });
+  });
+</script>
+
+<script>
+  $(document).ready(function () {
+    var showInProgressCheckbox = $('#showInProgress');
+
+    showInProgressCheckbox.on('change', function () {
+      $('#calendar').fullCalendar('rerenderEvents');
+    });
+
+    $('#calendar').fullCalendar({
+      header: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'agendaDay,month'
+      },
+      defaultView: 'agendaDay',
+      editable: false,
+      slotEventOverlap: false,
+      hiddenDays: [0, 6],
+      events: {
+        url: '/order/getDailyOrders',
+        method: 'GET',
+        extraParams: {
+          start: function () {
+            return $('#calendar').fullCalendar('getView').start.format('YYYY-MM-DDTHH:mm:ss');
+          },
+          end: function () {
+            return $('#calendar').fullCalendar('getView').end.format('YYYY-MM-DDTHH:mm:ss');
+          }
+        },
+        timezone: 'Europe/Warsaw',
+        failure: function () {
+          alert('Błąd pobierania danych zamówień.');
+        }
+      },
+      success: function (events) {
+        events.sort(function (a, b) {
+          return a.employeeName.localeCompare(b.employeeName);
+        });
+
+        $('#calendar').fullCalendar('removeEvents');
+        $('#calendar').fullCalendar('addEventSource', events);
+      },
+      eventClick: function (calEvent, jsEvent, view) {
+        openEditModal(calEvent.id);
+      },
+      eventRender: function (event, element) {
+        if (showInProgressCheckbox.prop('checked') && event.status !== 'W trakcie') {
+          return false;
+        }
+        element.find('.fc-time').css({
+          'color': '#455663',
+          'font-size': '15px'
+        });
+
+        element.find('.fc-title').html(
+                '<strong>' + 'Pracownik: ' + event.employeeName + '</strong><br>' +
+                'Klient: ' + event.clientName + '<br>' +
+                'Zlecenie: ' + event.title + '<br>' +
+                'Status: ' + event.status
+
+        );
+
+
+        var backgroundColor;
+
+        switch (event.status) {
+          case 'W trakcie':
+            backgroundColor = '#ADD8E6';
+            break;
+          case 'Gotowe':
+            backgroundColor = '#48D1CC';
+            break;
+          case 'Wydane':
+            backgroundColor = '#F08080';
+            break;
+          default:
+            backgroundColor = '#E6E6FA';
+            break;
+        }
+
+
+        element.css('background-color', backgroundColor);
+      },
+      locale: 'pl',
+      timeFormat: 'H:mm',
+      dayNamesShort: ['Niedz.', 'Pon.', 'Wt.', 'Śr.', 'Czw.', 'Piąt.', 'Sob.'],
+      monthNames: ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'],
+      views: {
+        agendaDay: {
+          buttonText: 'Dzień',
+          minTime: '08:00',
+          maxTime: '16:00'
+        },
+        month: {
+          buttonText: 'Miesiąc'
+        }
+      }
+    });
+
+    function openEditModal(orderId) {
+      currentOrderId = orderId;
+      fillEditModal(orderId);
+      $('#modal-edit').modal('show');
+    }
+  });
+</script>
+
+
+
+<script>
+  $(document).ready(function() {
+    function fetchUsers() {
+      $.ajax({
+        url: '/users/findByRole',
+        method: 'GET',
+        success: function(users) {
+          $('#userDropdown').empty();
+          $('#userDropdown-edit').empty();
+          users.forEach(function(user) {
+            $('#userDropdown').append('<a class="dropdown-item" href="#" onclick="selectUser(\'' + user.name + '\')">' + user.name + '</a>');
+            $('#userDropdown-edit').append('<a class="dropdown-item" href="#" onclick="selectUser(\'' + user.name + '\')">' + user.name + '</a>');
+          });
+        },
+        error: function(error) {
+          console.error('Błąd podczas pobierania użytkowników:', error);
+        }
+      });
+    }
+
+    window.selectUser = function(userName) {
+      $('#selectedUser').val(userName);
+      $('#selectedUser-edit').val(userName);
+    };
+
+    fetchUsers();
+  });
+</script>
+<script>
+  function specificDate(dateString) {
+    try {
+      const options = { day: 'numeric', month: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric' };
+      const formattedDate = new Date(dateString).toLocaleString('en-GB', options);
+
+      return formattedDate.replace(",", "");
+    } catch (error) {
+      console.error(`Error formatting date: ${error}`);
+      return 'Invalid Date';
+    }
+  }
+  $(document).ready(function () {
+    $("#checkAvailabilityBtn").click(function () {
+      var durationHours = $("#hours").val();
+
+
+      $.ajax({
+        type: "GET",
+        url: "/order/checkAvailability",
+        data: {
+          durationHours: durationHours
+        },
+        success: function (response) {
+          if (response.status === "success") {
+            var startDate = new Date(response.startDate);
+            var endDate = new Date(response.endDate);
+            var startDateText = startDate.toISOString().slice(0, 10);
+            var endDateText = endDate.toISOString().slice(0, 10);
+
+            var durationMinutes = response.durationMinutes;
+            var durationHours = Math.floor(durationMinutes / 60);
+            var durationMinutesRemainder = durationMinutes % 60;
+
+            $("#hours").val(durationHours + durationMinutesRemainder / 60);
+
+
+            $("#startDate").val(startDateText);
+            $("#startTime").val(response.startTime);
+            $("#endDate").val(endDateText);
+            $("#endTime").val(response.endTime);
+            $("#selectedUser").val(response.suggestedUser);
+          } else {
+            alert("Brak dostępnych pracowników w ramach dni roboczych.");
+          }
+        },
+        error: function () {
+          alert("Wystąpił błąd podczas sprawdzania dostępności.");
+        }
+      });
+    });
+  });
+</script>
+<script>
+
+  function fillEditModal(orderId) {
+    currentOrderId = orderId;
+    $.ajax({
+      url: `/order/getOrderDetails/${orderId}`,
+      type: 'GET',
+      success: function (orderDetails) {
+        $('#editForm input[name="description-edit"]').val(orderDetails.description);
+        $('#editForm input[name="clientName-edit"]').val(orderDetails.clientName);
+        $('#editForm input[name="email-edit"]').val(orderDetails.email);
+        $('#editForm input[name="phoneNumber-edit"]').val(orderDetails.phoneNumber);
+        $('#editForm input[name="hours-edit"]').val(orderDetails.hours);
+        $('#editForm input[name="startDate-edit"]').val(orderDetails.startDate);
+        $('#editForm input[name="startTime-edit"]').val(orderDetails.startTime);
+        $('#editForm input[name="endDate-edit"]').val(orderDetails.endDate);
+        $('#editForm input[name="endTime-edit"]').val(orderDetails.endTime);
+        $("#selectedUser-edit").val(orderDetails.employee);
+        $('#editForm input[name="price-edit"]').val(orderDetails.price);
+
+        $(document).ready(function () {
+          switch (orderDetails.status) {
+            case 'W trakcie':
+              $('#statusDropdownButton .status-text').text('W trakcie');
+              $('#statusDropdownButton').attr('data-value', 'W trakcie');
+              globalStatus = 'W trakcie';
+              break;
+            case 'Gotowe':
+              $('#statusDropdownButton .status-text').text('Gotowe');
+              $('#statusDropdownButton').attr('data-value', 'Gotowe');
+              globalStatus = 'Gotowe';
+              break;
+            case 'Wydane':
+              $('#statusDropdownButton .status-text').text('Wydane');
+              $('#statusDropdownButton').attr('data-value', 'Wydane');
+              globalStatus = 'Wydane';
+              break;
+            default:
+              console.log('Nieznany status');
+              break;
+          }
+        });
+
+        var materialList = $("#materialList-edit");
+        $("#materialList-edit").empty();
+        for (var i = 0; i < orderDetails.materials.length; i++)
+        {
+          var itemValue = orderDetails.materials[i].item;
+          var newItem = $("<li>" + itemValue + "</li>");
+          materialList.append(newItem);
+        }
+      },
+      error: function () {
+        console.log('Błąd podczas pobierania danych zamówienia.');
+      }
+    });
+  }
+
+  $(document).ready(function () {
+    $('#statusDropdown-edit a').on('click', function () {
+      var selectedStatusValue = $(this).text().trim();
+
+      switch (selectedStatusValue) {
+        case 'W trakcie':
+          $('#statusDropdownButton .status-text').text('W trakcie');
+          globalStatus = 'W trakcie';
+          break;
+        case 'Gotowe':
+          $('#statusDropdownButton .status-text').text('Gotowe');
+          globalStatus = 'Gotowe';
+          break;
+        case 'Wydane':
+          $('#statusDropdownButton .status-text').text('Wydane');
+          globalStatus = 'Wydane';
+          break;
+        default:
+          console.log('Nieznany status');
+          break;
+      }
+
+      console.log('Zmieniono status:', globalStatus);
+    });
+  });
+
+  $('#editForm').submit(function(event) {
+    event.preventDefault();
+    var description = $('input[name="description-edit"]').val();
+    var clientName = $('input[name="clientName-edit"]').val();
+    var email = $('input[name="email-edit"]').val();
+    var phoneNumber = $('input[name="phoneNumber-edit"]').val();
+    var hours = $('#hours-edit').val();
+    var startDate = document.getElementById('startDate-edit').value;
+    var startTime = document.getElementById('startTime-edit').value;
+    var endDate = document.getElementById('endDate-edit').value;
+    var endTime = document.getElementById('endTime-edit').value;
+
+    var selectedUser = $('#selectedUser-edit').val();
+    var price = $('input[name="price-edit"]').val();
+    var status = globalStatus;
+
+    var combinedStartDateTimeString = startDate + ' ' + startTime + ':00';
+    var combinedEndDateTimeString = endDate + ' ' + endTime + ':00';
+
+    var combinedStartDateTime = moment.tz(combinedStartDateTimeString, 'YYYY-MM-DD HH:mm', 'Europe/Warsaw');
+    var combinedEndDateTime = moment.tz(combinedEndDateTimeString, 'YYYY-MM-DD HH:mm', 'Europe/Warsaw');
+
+    var formattedStartDateTime = combinedStartDateTime.format('YYYY-MM-DD HH:mm:ss');
+    var formattedEndDateTime = combinedEndDateTime.format('YYYY-MM-DD HH:mm:ss');
+    var materials = [];
+
+    $("#materialList-edit li").each(function () {
+      materials.push($(this).text());
+    });
+
+    var data = {
+      id: currentOrderId,
+      description: description,
+      clientName: clientName,
+      email: email,
+      phoneNumber: phoneNumber,
+      hours: hours,
+      startDate: formattedStartDateTime,
+      endDate:  formattedEndDateTime,
+      selectedUser: selectedUser,
+      price: price,
+      status: status,
+      items: materials,
+    };
+
+    $.ajax({
+      type: 'POST',
+      url: '/order/edit/' + currentOrderId,
+      contentType: 'application/json',
+      data: JSON.stringify(data),
+      success: function() {
+        console.log('Zamówienie edytowane pomyślnie.');
+        $('#calendar').fullCalendar('refetchEvents');
+        $('#modal-edit').modal('hide');
+      },
+      error: function(error) {
+        console.error('Błąd podczas edycji zamówienia:', error);
+      }
+    });
+  });
+  $(document).ready(function () {
+    $("#checkAvailabilityBtn-edit").click(function () {
+      var durationHours = $("#hours-edit").val();
+
+
+      $.ajax({
+        type: "GET",
+        url: "/order/checkAvailabilityNextDay/" + currentOrderId,
+        data: {
+          durationHours: durationHours
+        },
+        success: function (response) {
+          if (response.status === "success") {
+            var startDate = new Date(response.startDate);
+            var endDate = new Date(response.endDate);
+            var startDateText = startDate.toISOString().slice(0, 10);
+            var endDateText = endDate.toISOString().slice(0, 10);
+
+            var durationMinutes = response.durationMinutes;
+            var durationHours = Math.floor(durationMinutes / 60);
+            var durationMinutesRemainder = durationMinutes % 60;
+
+            $("#hours").val(durationHours + durationMinutesRemainder / 60);
+
+            $("#startDate-edit").val(startDateText);
+            $("#startTime-edit").val(response.startTime);
+            $("#endDate-edit").val(endDateText);
+            $("#endTime-edit").val(response.endTime);
+            $("#selectedUser-edit").val(response.suggestedUser);
+          } else {
+            alert("Brak dostępnych pracowników w ramach dni roboczych.");
+          }
+        },
+        error: function () {
+          alert("Wystąpił błąd podczas sprawdzania dostępności.");
+        }
+      });
+    });
+  });
+  $(document).ready(function () {
+    $("#checkAvailabilityBtn2-edit").click(function () {
+      var durationHours = $("#hours-edit").val();
+
+
+      $.ajax({
+        type: "GET",
+        url: "/order/otherEmployee/" + currentOrderId,
+        data: {
+          durationHours: durationHours
+        },
+        success: function (response) {
+          if (response.status === "success") {
+            var startDate = new Date(response.startDate);
+            var endDate = new Date(response.endDate);
+            var startDateText = startDate.toISOString().slice(0, 10);
+            var endDateText = endDate.toISOString().slice(0, 10);
+
+            var durationMinutes = response.durationMinutes;
+            var durationHours = Math.floor(durationMinutes / 60);
+            var durationMinutesRemainder = durationMinutes % 60;
+
+            $("#hours").val(durationHours + durationMinutesRemainder / 60);
+
+            $("#startDate-edit").val(startDateText);
+            $("#startTime-edit").val(response.startTime);
+            $("#endDate-edit").val(endDateText);
+            $("#endTime-edit").val(response.endTime);
+            $("#selectedUser-edit").val(response.suggestedUser);
+          } else {
+            alert("Brak dostępnych pracowników w ramach dni roboczych.");
+          }
+        },
+        error: function () {
+          alert("Wystąpił błąd podczas sprawdzania dostępności.");
+        }
+      });
+    });
+  });
+</script>
+<script>
+  function handleConfirmDelete() {
+    $.ajax({
+      url: '/order/delete/' + currentOrderId,
+      method: 'DELETE',
+      success: function (data) {
+        $('#calendar').fullCalendar('refetchEvents');
+      },
+      error: function (error) {
+        console.error('Błąd podczas usuwania zlecenia:', error);
+      }
+    });
+  }
+</script>
+<script>
+  function deleteAlerts(){
+
+    $.ajax({
+      url: "/removeAlerts",
+      type: "DELETE",
+      success: function() {
+
+        location.reload()
+      },
+      error: function() {
+
+      }
+    });
+
+  }
+</script>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Logowanie</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web:400,600,700">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/static/css/Button-Change-Text-on-Hover.css">
+    <link rel="stylesheet" href="/static/css/Chat.css">
+    <link rel="stylesheet" href="/static/css/Data-Table-styles.css">
+    <link rel="stylesheet" href="/static/css/Data-Table.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.15/css/dataTables.bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/css/theme.bootstrap_4.min.css">
+    <link rel="stylesheet" href="/static/css/info-box.css">
+    <link rel="stylesheet" href="/static/css/Ludens---1-Dark-mode-Index-Table-with-Search-Filters.css">
+    <link rel="stylesheet" href="/static/css/Navbar-With-Button-icons.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+</head>
+<div class="modal fade" id="modalForgotPassword" tabindex="-1" role="dialog" aria-labelledby="modalForgotPasswordLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalForgotPasswordLabel">Resetowanie hasła</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Wpisz adres e-mail</p>
+                <input type="email" class="form-control" id="email" placeholder="Wpisz swój email">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                <button class="btn btn-primary" id="resetPassword">Wyślij kod na email</button>
+            </div>
+        </div>
+    </div>
+</div>
+<body class="bg-gradient-primary" style="background: var(--bs-gray-100);">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-9 col-lg-12 col-xl-10" >
+            <div class="card shadow-lg o-hidden border-0 my-5" style="background-color: var(--bs-gray-100)">
+                <div class="card-body p-0">
+                    <div class="row">
+                        <div class="col-lg-6 d-none d-lg-flex bg-dark">
+                            <div class="flex-grow-1 bg-login-image" style="background-image: url('/static/img/pictures/image1.jpg');"></div>
+                        </div>
+                        <div class="col-lg-6 bg-dark">
+                            <div class="p-5 bg-dark">
+                                <div class="text-center" style="font-size: large">
+                                    <h2 class="text-light mb-4">Witamy na stronie zakładu krawieckiego!</h2>
+                                </div>
+                                <form action="/login" method="post">
+                                    <div class="mb-3"><input class="form-control form-control-user" type="email" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Wprowadź adres email..." name="email"></div>
+                                    <div class="mb-3"><input class="form-control form-control-user" type="password" id="exampleInputPassword" placeholder="Hasło" name="password"></div>
+                                    <div class="mb-3">
+                                    </div><button class="btn btn-primary d-block btn-user w-100 text-light" style="font-size: large;" type="submit">Zaloguj</button>
+                                    <div class="text-center">
+                                        <a class="small" href="#" style="font-size: large; color: white;" data-bs-toggle="modal" data-bs-target="#modalForgotPassword">Zapomniałem hasła</a>
+                                    </div>
+                                    <p th:if="${error}" style="color: red">
+                                         <span th:text="${error}"></span>
+                                    </p>
+                                    <hr><a href="/oauth2/authorization/google" class="btn btn-primary d-block btn-google btn-user w-100 mb-2 border-0" style="font-size: large;" role="button"><i class="fab fa-google"></i>&nbsp; Logowanie poprzez Google</a>
+                                    <hr>
+                                </form>
+                                <div class="text-center"><a class="small " href="http://localhost:8080/register" style="font-size: large; color: white;">Utwórz konto</a></div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+            <section class="py-4 py-xl-5">
+                <div class="container">
+                    <div class="text-white bg-dark border rounded border-0 p-4 p-md-5">
+                        <h2 class="fw-bold text-white mb-3">Witamy w zakładzie krawieckim!</h2>
+                        <p class="mb-4">Ponieżej możesz sprawdzić oferowane usługi wraz z cennikiem.</p>
+                        <div class="my-3"><a class="btn btn-primary btn-lg me-2 text-light" role="button"  href="http://localhost:8080/price_list">Sprawdź ofertę</a>
+                        <a class="btn btn-light btn-lg" role="button" href="http://localhost:8080/ordersList">Sprawdź swoje zlecenia!</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <footer class="text-white bg-dark"></footer>
+        </div>
+    </div>
+</div>
+</div>
+<script src="/static/bootstrap/js/bootstrap.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.15/js/dataTables.bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/jquery.tablesorter.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/widgets/widget-filter.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/widgets/widget-storage.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="/static/js/Ludens---1-Dark-mode-Index-Table-with-Search-Filters-1.js"></script>
+<script src="/static/js/Ludens---1-Dark-mode-Index-Table-with-Search-Filters-2.js"></script>
+<script src="/static/js/Ludens---1-Dark-mode-Index-Table-with-Search-Filters.js"></script>
+<script src="/static/js/theme.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+</body>
+<script>
+    $(document).ready(function(){
+        $("#resetPassword").click(function(){
+            var email = $("#email").val();
+            $.ajax({
+                type: "POST",
+                url: "/send-new-password",
+                data: JSON.stringify({ email: email }),
+                contentType: "application/json",
+                success: function(response) {
+                    alert("Sprawdź swój email.");
+                    $('#modalForgotPassword').modal('hide');
+                },
+                error: function(xhr, status, error) {
+                    alert("Wystąpił błąd: " + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+</html>

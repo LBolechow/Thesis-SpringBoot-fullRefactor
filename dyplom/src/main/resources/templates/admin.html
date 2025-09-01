@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Panel administratora</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/static/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/fonts/fontawesome5-overrides.min.css">
+    <link rel="stylesheet" href="/static/css/animate.min.css">
+    <link rel="stylesheet" href="/static/css/Add-Another-Button.css">
+    <link rel="stylesheet" href="/static/css/Navbar-With-Button-icons.css">
+    <link rel="stylesheet" href="/static/css/Table-With-Search-search-table.css">
+    <link rel="stylesheet" href="/static/css/Table-With-Search.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<style>
+    #userList li.active {
+        background-color: #4CAF50;
+        color: #fff;
+        list-style-type: disc;
+    }
+</style>
+</head>
+
+<body id="page-top">
+   <div id="wrapper">
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content" style="text-align: center; font-family: ABeeZee, sans-serif; font-size: 18px; height: auto;">
+                <nav class="navbar navbar-light navbar-expand-md sticky-top bg-dark shadow mb-4 topbar static-top" style="background: var(--bs-dark);">
+                    <div class="container-fluid"><button class="btn btn-link d-md-none rounded-circle me-3" id="sidebarToggleTop" type="button"><i class="fas fa-bars"></i></button><span></span><a class="navbar-brand" href="#" style="font-size: 30px;color: var(--bs-orange);">Zakład krawiecki</a>
+                        <div class="collapse navbar-collapse">
+                            <ul class="navbar-nav">
+                                <li class="nav-item"><a class="nav-link" href="http://localhost:8080/employeeChat">Panel wiadomości</a></li>
+                                <li class="nav-item"><a class="nav-link" href="http://localhost:8080/daily">Lista dzienna</a></li>
+                                <li class="nav-item"><a class="nav-link" href="http://localhost:8080/price_list">Cennik</a></li>
+                                <li class="nav-item"><a class="nav-link" href="http://localhost:8080/materials">Materiały</a></li>
+                                <li class="nav-item"><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modal-1">Wyślij powiadomienie</a></li>
+                            </ul>
+                        </div><button data-bs-target="#" data-bs-toggle="collapse" class="navbar-toggler"></button>
+                        <form class="d-none d-sm-inline-block me-auto ms-md-3 my-2 my-md-0 mw-100 navbar-search">
+                            <div class="input-group"></div>
+                        </form>
+                        <ul class="navbar-nav flex-nowrap ms-auto">
+                            <li class="nav-item dropdown d-sm-none no-arrow"><a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#"><i class="fas fa-search"></i></a>
+                                <div class="dropdown-menu dropdown-menu-end p-3 animated--grow-in" aria-labelledby="searchDropdown">
+                                    <form class="me-auto navbar-search w-100">
+                                        <div class="input-group"><input class="bg-light form-control border-0 small" type="text" placeholder="Search for ...">
+                                            <div class="input-group-append"><button class="btn btn-primary py-0" type="button"><i class="fas fa-search"></i></button></div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </li>
+                            <li class="nav-item dropdown no-arrow mx-1">
+                                <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#"><span id="alertamount" class="badge bg-danger badge-counter">3+</span><i class="fas fa-bell fa-fw"></i></a>
+                                    <div style="height: 650px; overflow: auto;" id="notification" class="dropdown-menu dropdown-menu-end dropdown-list animated--grow-in">
+                                        <h6 class="dropdown-header">Powiadomienia</h6><a class="dropdown-item text-center small text-gray-500" onclick="deleteAlerts()" href="#">Usuń wszystkie powiadomienia</a>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <div class="d-none d-sm-block topbar-divider"></div>
+                            <li class="nav-item dropdown no-arrow">
+                                <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#"><span id="user" class="d-none d-lg-inline me-2 text-gray-600 small"></span><img class="border rounded-circle img-profile" src="/static/img/avatars/avatar1.png"></a>
+                                    <div class="dropdown-menu shadow dropdown-menu-end animated--grow-in"><a class="dropdown-item" href="/profile"><i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Profil</a>
+                                        <div class="dropdown-divider"></div><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Wyloguj</a>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+                <div class="container-fluid">
+                    <h3 class="text-dark mb-1">Lista użytkowników</h3>
+                </div>
+                <div class="modal fade" role="dialog" tabindex="-1" id="modal-1">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Stwórz powiadomienie</h4>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="notificationContent" class="col-form-label" style="padding-top: 10px; margin-top: 10px;">Treść powiadomienia:</label>
+                                        <input type="text" class="form-control" id="notificationContent" placeholder="Wpisz treść powiadomienia">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <label class="col-form-label" style="padding-top: 10px; margin-top: 10px;">Wybierz pracowników</label>
+                                    </div>
+                                </div>
+                                <ul id="userList" style="text-align: left;">
+                                    <!-- Lista użytkowników zostanie wypełniona dynamicznie za pomocą JavaScript -->
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-light" type="button" data-bs-dismiss="modal">Zamknij</button>
+                                <button class="btn btn-primary" type="button" onclick="createNotification()">Wyślij</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h1></h1>
+                <div class="row">
+                    <div class="col d-xxl-flex justify-content-xxl-end"><button class="btn btn-outline-primary text-truncate float-none float-sm-none add-another-btn" data-bss-hover-animate="pulse" type="button" data-bs-target="#addUserModal" data-bs-toggle="modal" style="width: 300px;/*float: right;*/font-size: 18px;display: block;">Dodaj użytkownika<i class="fas fa-plus-circle edit-icon"></i></button></div>
+                </div>
+                <div class="col-md-12 search-table-col" style="margin-top: 40px; display: flex; justify-content: flex-end;">
+                    <!-- Dropdown lista -->
+                    <div class="form-group col-lg-4" style="margin-right: 10px;">
+                        <select class="form-control" id="searchCategory">
+                            <option value="name">Nazwa</option>
+                            <option value="role">Rola</option>
+                            <option value="email">Email</option>
+                        </select>
+                    </div>
+
+                    <!-- Input do wyszukiwania -->
+                    <div class="form-group col-lg-4" style="margin-right: 10px;">
+                        <input type="text" class="search form-control" placeholder="Szukaj..." style="display: block;">
+                    </div>
+
+                    <!-- Przycisk do potwierdzenia -->
+                    <div class="form-group col-auto" style="text-align: left;">
+                        <button class="btn btn-primary text-dark border-0" style="font-size: large" id="searchButton">Szukaj</button>
+                    </div>
+
+                    <span class="counter pull-right"></span>
+                </div>
+
+                    <span class="counter pull-right"></span>
+
+                    <div class="table-responsive table table-hover table-bordered results">
+                        <table id="myTable" class="table table-hover table-bordered">
+                            <thead class="bill-header cs">
+                                <tr>
+                                    <th id="trs-hd-1" class="col-lg-1" style="width: 10%;">ID</th>
+                                    <th id="trs-hd-2" class="col-lg-2" style="width: 20%;">Nazwa</th>
+                                    <th id="trs-hd-5" class="col-lg-2" style="width: 30%;">Email</th>
+                                    <th id="trs-hd-3" class="col-lg-3" style="width: 20%;">Rola</th>
+                                    <th id="trs-hd-6" class="col-lg-2" style="width: 5%;min-width: 10%;">Akcje</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="warning no-result">
+                                    <td colspan="12"><i class="fa fa-warning"></i>&nbsp; No Result !!!</td>
+                                </tr>
+
+                                <tr th:each="user : ${users}">
+                                    <td th:text="${user.id}"></td>
+                                    <td th:text="${user.name}"></td>
+                                    <td th:text="${user.email}"></td>
+                                    <td>
+    <span th:each="role : ${user.roles}">
+        <span th:if="${role.name == 'ROLE_ADMIN'}">Administrator</span>
+        <span th:if="${role.name == 'ROLE_EMPLOYEE'}">Pracownik</span>
+        <span th:if="${role.name == 'ROLE_CLIENT'}">Klient</span>
+    </span>
+
+                                    </td>
+                                    <td style="width: 6%;"><button class="edit-btn btn btn-success" th:attr="data-user-id=${user.id}" style="margin-left: 0px;"><i class="far fa-edit" style="font-size: 15px;"></i></button>
+                                        <button class="btn btn-danger confirm-delete"
+                                                style="margin-left: 5px; position: static;"
+                                                type="button"
+                                                th:attr="data-user-id=${user.id}"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modal-2"
+                                                data-action="delete">
+                                            <i class="fa fa-trash" style="font-size: 15px;"></i>
+                                        </button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col d-xxl-flex justify-content-xxl-center">
+                        <nav>
+                            <ul class="pagination">
+                                <li class="page-item" th:if="${currentPage > 0}">
+                                    <a class="page-link" th:href="@{/panel_administratora?page=0}" aria-label="First">
+                                        <span aria-hidden="true">««</span>
+                                    </a>
+                                </li>
+                                <li class="page-item" th:if="${currentPage > 0}">
+                                    <a class="page-link" th:href="@{${'/panel_administratora?page=' + (currentPage - 1)}}" aria-label="Previous">
+                                        <span aria-hidden="true">«</span>
+                                    </a>
+                                </li>
+                                <li class="page-item" th:each="pageItem : ${#numbers.sequence(0, totalPages - 1)}" th:class="${pageItem == currentPage} ? 'active' : ''">
+                                    <a class="page-link" th:href="@{/panel_administratora(page=${pageItem})}" th:text="${pageItem + 1}"></a>
+                                </li>
+                                <li class="page-item" th:if="${currentPage < totalPages - 1}">
+                                    <a class="page-link" th:href="@{${'/panel_administratora?page=' + (currentPage + 1)}}" aria-label="Next">
+                                        <span aria-hidden="true">»</span>
+                                    </a>
+                                </li>
+                                <li class="page-item" th:if="${currentPage < totalPages - 1}">
+                                    <a class="page-link" th:href="@{${'/panel_administratora?page=' + (totalPages - 1)}}" aria-label="Last">
+                                        <span aria-hidden="true">»»</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <div class="modal fade"  role="dialog" tabindex="-1" id="modal-2">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title" style="font-size: 20px;">Czy na pewno chcesz usunąć użytkownika.</h4><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Zmiana jest nieodwracalna.</p>
+                            </div>
+                            <div class="modal-footer d-xxl-flex justify-content-xxl-center"><button class="btn btn-light d-xxl-flex" type="button" data-bs-dismiss="modal">Nie</button><button id="confirmDeleteButton" class="btn btn-primary" type="button" data-bs-dismiss="modal">Tak</button></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="addUserModalLabel">Dodaj nowego użytkownika</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="addUserForm">
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">Nazwa</label>
+                                        <input type="text" class="form-control" id="name" name="name" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Hasło</label>
+                                        <input type="password" class="form-control" id="password" name="password" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="role" class="form-label">Rola</label>
+                                        <select class="form-select" id="role" name="role" required>
+                                            <option value="ROLE_CLIENT">Klient</option>
+                                            <option value="ROLE_EMPLOYEE">Pracownik</option>
+                                            <option value="ROLE_ADMIN">Administrator</option>
+                                        </select>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                                <button type="button" class="btn btn-primary" id="addUserButton" data-bs-dismiss="modal">Dodaj</button>
+                            </div>
+                            <div id="successMessage" style="color: green;" class="d-flex justify-content-center"></div>
+                            <div id="errorMessage" style="color: red;" class="d-flex justify-content-center"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+    </div>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/js/bs-init.js"></script>
+    <script src="/static/js/Table-With-Search.js"></script>
+    <script src="/static/js/theme.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+</body>
+<script>
+    $("#searchButton").click(function () {
+        var searchText = $(".search").val();
+        var searchCategory = $("#searchCategory").val();
+        if (searchText.trim() === "") {
+            window.location.reload();
+            return;
+        }
+
+        $.ajax({
+            url: "/search-users",
+            method: "GET",
+            data: {
+                category: searchCategory,
+                searchText: searchText
+            },
+            success: function (data) {
+                $("#myTable tbody").empty();
+
+                $.each(data, function (index, user) {
+                    console.log(user);
+                    var row = $("<tr>").append(
+                        $("<td>").text(user.id),
+                        $("<td>").text(user.name),
+                        $("<td>").text(user.email),
+                        $("<td>").text(formatRole(user.role)),
+                        $("<td>").append(
+                            $('<button class="edit-btn btn btn-success">')
+                                .attr("data-user-id", user.id)
+                                .html('<i class="far fa-edit" style="font-size: 15px;"></i>'),
+                            $('<button class="btn btn-danger confirm-delete">')
+                                .attr("data-user-id", user.id)
+                                .attr("data-bs-toggle", "modal")
+                                .attr("data-bs-target", "#modal-2")
+                                .attr("data-action", "delete")
+                                .html('<i class="fa fa-trash" style="font-size: 15px;"></i>')
+                        )
+                    );
+
+                    $("#myTable tbody").append(row);
+                });
+            },
+            error: function (error) {
+                console.error("Wystąpił błąd: " + error.statusText);
+            }
+        });
+    });
+
+</script>
+<script>
+    $.get("/user", function(data) {
+        $("#user").html(data.name);
+        for(let i=data.notifications.length-1;i>=0;i--){
+            var t = `<a class="dropdown-item d-flex align-items-center" href="#">
+                                            <div class="me-3">
+                                                <div class="bg-warning icon-circle"><i class="fas fa-exclamation-triangle text-white"></i></div>
+                                            </div>
+                                            <div><span class="small text-gray-500">`+data.notifications[i].creator + " " +data.notifications[i].date+`</span>
+                                                <p>`+data.notifications[i].description+`</p>
+                                            </div>
+                                        </a>`
+
+            $('#notification').append(t)
+        }
+        $('#alertamount').text(data.notifications.length);
+    });
+</script>
+
+<script>
+    $("#addUserButton").click(function () {
+        var name = $("#name").val();
+        var email = $("#email").val();
+        var password = $("#password").val();
+        var role = $("#role").val();
+        var userData = {
+            name: name,
+            email: email,
+            password: password,
+            role: role
+        };
+
+        $.post("/users/add", userData, function (data) {
+            var successMessage = $("#successMessage");
+            var errorMessage = $("#errorMessage");
+
+            if (data.success) {
+                alert("Użytkownik został dodany pomyślnie.");
+                location.reload();
+                errorMessage.text("");
+            } else {
+                alert("Wystąpił błąd podczas dodawania użytkownika: " + data.message);
+                successMessage.text("");
+            }
+
+        }).fail(function (error) {
+            console.error("Wystąpił błąd: " + error.statusText);
+        });
+    });
+
+</script>
+<script>
+    $(document).ready(function() {
+        $('#myTable').on('click', '.edit-btn', function() {
+            var btn = $(this);
+            var id = btn.attr('data-user-id');
+            var row = btn.closest('tr');
+            var name = row.find('td:eq(1)').text();
+            var email = row.find('td:eq(2)').text();
+            var role = row.find('td:eq(3)').text();
+
+            if (btn.hasClass('btn-success')) {
+                btn.removeClass('btn-success').addClass('btn-primary save-button').html('<i class="fas fa-save"></i>');
+                row.find('td:eq(1)').html('<input type="text" class="form-control" value="'+name+'" />');
+                row.find('td:eq(2)').html('<input type="text" class="form-control" value="'+email+'" />');
+                var roleSelect = $('<select class="form-control"><option value="ROLE_CLIENT">Klient</option><option value="ROLE_EMPLOYEE">Pracownik</option><option value="ROLE_ADMIN">Administrator</option></select>');
+                roleSelect.val(role);
+                row.find('td:eq(3)').html(roleSelect);
+            } else {
+                btn.removeClass('btn-primary save-button').addClass('btn-success').html('<i class="far fa-edit"></i>');
+                var newName = row.find('td:eq(1) input').val();
+                var newEmail = row.find('td:eq(2) input').val();
+                var newRole = row.find('td:eq(3) select').val();
+                $.ajax({
+                    url: '/users/update/' + id,
+                    type: 'PUT',
+                    data: {
+                        name: newName,
+                        email: newEmail,
+                        role: newRole,
+                    },
+                    success: function() {
+                        row.find('td:eq(1)').html(newName);
+                        row.find('td:eq(2)').html(newEmail);
+                        row.find('td:eq(3)').html(newRole);
+                    },
+                    error: function() {
+                        alert('Wystąpił błąd przy zapisywaniu zmian.');
+                    }
+                });
+            }
+        });
+
+        $('#myTable').on('click', '.confirm-delete', function() {
+            var userIdToDelete = $(this).data("user-id");
+            $('#confirmDeleteButton').attr('data-user-id', userIdToDelete);
+
+        });
+        $('#confirmDeleteButton').on('click', function() {
+            var userIdToDelete = $(this).data("user-id");
+
+            if (userIdToDelete) {
+                $.ajax({
+                    url: "/users/delete/" + userIdToDelete,
+                    type: "DELETE",
+                    success: function () {
+                        console.log("User deleted successfully");
+                        window.location.reload();
+                    },
+                    error: function (error) {
+                        console.error("Error deleting user: " + error.responseText);
+                    }
+                });
+            } else {
+                console.error("User ID to delete is not set.");
+            }
+        });
+    });
+    function mapRoleToLabel(role) {
+        switch (role) {
+            case 'ROLE_ADMIN':
+                return 'Administrator';
+            case 'ROLE_EMPLOYEE':
+                return 'Pracownik';
+            case 'ROLE_CLIENT':
+                return 'Klient';
+            default:
+                return 'Inna rola';
+        }
+    }
+</script>
+<script>
+    function deleteAlerts(){
+
+        $.ajax({
+            url: "/removeAlerts",
+            type: "DELETE",
+            success: function() {
+
+                location.reload()
+            },
+            error: function() {
+
+            }
+        });
+
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: "/users/employees-and-admins",
+            method: "GET",
+            success: function (data) {
+                var userList = $("#userList");
+                userList.empty();
+
+
+                data.forEach(function (user) {
+                    var listItem = $("<li>").text(user.name);
+
+                    listItem.data("userId", user.id);
+
+                    listItem.click(function (event) {
+                        $(event.target).toggleClass("active");
+                    });
+
+                    userList.append(listItem);
+                });
+            },
+            error: function (error) {
+                console.error("Błąd podczas pobierania użytkowników:", error);
+            }
+        });
+    });
+</script>
+<script>
+    function createNotification() {
+        var participantIds = [];
+        $("#userList li.active").each(function() {
+            participantIds.push($(this).data("userId"));
+        });
+
+        var text = $('#notificationContent').val();
+
+        $.ajax({
+            url: '/create-notification',
+            type: "POST",
+            contentType: "application/x-www-form-urlencoded",
+            data: {
+                text: text,
+                participantIds: participantIds.join(',')
+            },
+            success: function(response) {
+                console.log('Powiadomienie wysłane pomyślnie', response);
+                ('#modal-1').modal('hide');
+            },
+            error: function(xhr, status, error) {
+                console.error('Błąd wysyłania powiadomienia', status, error);
+            }
+        });
+    }
+    function formatRole(role) {
+        switch(role) {
+            case 'ROLE_ADMIN':
+                return 'Administrator';
+            case 'ROLE_EMPLOYEE':
+                return 'Pracownik';
+            case 'ROLE_CLIENT':
+                return 'Klient';
+            default:
+                return 'Nieznana rola';
+        }
+    }
+</script>
+
+</html>

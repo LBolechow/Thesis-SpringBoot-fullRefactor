@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <title>Profil</title>
+  <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web:400,600,700">
+  <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+  <link rel="stylesheet" href="/static/fonts/font-awesome.min.css">
+  <link rel="stylesheet" href="/static/fonts/fontawesome5-overrides.min.css">
+  <link rel="stylesheet" href="/static/css/Button-Change-Text-on-Hover.css">
+  <link rel="stylesheet" href="/static/css/Chat.css">
+  <link rel="stylesheet" href="/static/css/Data-Table-styles.css">
+  <link rel="stylesheet" href="/static/css/Data-Table.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.15/css/dataTables.bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/css/theme.bootstrap_4.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+  <link rel="stylesheet" href="/static/css/info-box.css">
+  <link rel="stylesheet" href="/static/css/Ludens---1-Dark-mode-Index-Table-with-Search-Filters.css">
+  <link rel="stylesheet" href="/static/css/Navbar-With-Button-icons.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+
+</head>
+
+<body id="page-top">
+<div id="wrapper">
+  <div class="d-flex flex-column" id="content-wrapper">
+    <div id="content" style="text-align: center;font-family: ABeeZee, sans-serif;font-size: 18px;height: 1080px;">
+      <nav class="navbar navbar-light navbar-expand-md sticky-top bg-dark shadow mb-4 topbar static-top" style="background: var(--bs-dark);">
+        <div class="container-fluid"><button class="btn btn-link d-md-none rounded-circle me-3" id="sidebarToggleTop" type="button"><i class="fas fa-bars"></i></button><span></span><a class="navbar-brand" href="#" style="font-size: 30px;color: var(--bs-orange);">Zakład krawiecki</a>
+          <div class="collapse navbar-collapse">
+            <ul class="navbar-nav" th:if="${#authorization.expression('hasAnyRole(''ROLE_ADMIN'')')}">
+              <li class="nav-item"><a class="nav-link active" href="http://localhost:8080/panel_administratora">Panel administratora</a></li>
+              <li class="nav-item"><a class="nav-link" href="http://localhost:8080/employeeChat">Panel wiadomości</a></li>
+              <li class="nav-item"><a class="nav-link" href="http://localhost:8080/daily">Lista dzienna</a></li>
+              <li class="nav-item"><a class="nav-link" href="http://localhost:8080/price_list">Cennik</a></li>
+            </ul>
+            <ul class="navbar-nav" th:if="${#authorization.expression('hasAnyRole(''ROLE_EMPLOYEE'')')}">
+              <li class="nav-item"><a class="nav-link" href="http://localhost:8080/employeeChat">Panel wiadomości</a></li>
+              <li class="nav-item"><a class="nav-link" href="http://localhost:8080/daily">Lista dzienna</a></li>
+              <li class="nav-item"><a class="nav-link" href="http://localhost:8080/price_list">Cennik</a></li>
+            </ul>
+            <ul class="navbar-nav" th:if="${#authorization.expression('hasAnyRole(''ROLE_CLIENT'')')}">
+              <li class="nav-item"><a class="nav-link" href="http://localhost:8080/employeeChat">Napisz wiadomość</a></li>
+              <li class="nav-item"><a class="nav-link" href="http://localhost:8080/price_list">Cennik</a></li>
+            </ul>
+          </div>
+          <button data-bs-target="#" data-bs-toggle="collapse" class="navbar-toggler"></button>
+          <form class="d-none d-sm-inline-block me-auto ms-md-3 my-2 my-md-0 mw-100 navbar-search">
+            <div class="input-group"></div>
+          </form>
+          <ul class="navbar-nav flex-nowrap ms-auto">
+            <li class="nav-item dropdown d-sm-none no-arrow"><a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#"><i class="fas fa-search"></i></a>
+              <div class="dropdown-menu dropdown-menu-end p-3 animated--grow-in" aria-labelledby="searchDropdown">
+                <form class="me-auto navbar-search w-100">
+                  <div class="input-group"><input class="bg-light form-control border-0 small" type="text" placeholder="Search for ...">
+                    <div class="input-group-append"><button class="btn btn-primary py-0" type="button"><i class="fas fa-search"></i></button></div>
+                  </div>
+                </form>
+              </div>
+            </li>
+            <li class="nav-item dropdown no-arrow mx-1">
+              <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#"><span id="alertamount" class="badge bg-danger badge-counter">3+</span><i class="fas fa-bell fa-fw"></i></a>
+                <div style="height: 650px; overflow: auto;" id="notification" class="dropdown-menu dropdown-menu-end dropdown-list animated--grow-in">
+                  <h6 class="dropdown-header">Powiadomienia</h6><a class="dropdown-item text-center small text-gray-500" onclick="deleteAlerts()" href="#">Usuń wszystkie powiadomienia</a>
+                </div>
+              </div>
+            </li>
+            <div class="d-none d-sm-block topbar-divider"></div>
+            <li class="nav-item dropdown no-arrow">
+              <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#"><span id="user" class="d-none d-lg-inline me-2 text-gray-600 small"></span><img class="border rounded-circle img-profile" src="/static/img/avatars/avatar1.png"></a>
+                <div class="dropdown-menu shadow dropdown-menu-end animated--grow-in"><a class="dropdown-item" href="/profile"><i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Profil</a>
+                  <div class="dropdown-divider"></div><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Wyloguj</a>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <label class="form-label" style="font-size: 40px;">Materiały</label>
+      <div class="container" style="width: 100%;text-align: center;margin-bottom: 2%;">
+        <label class="form-label">Od:&nbsp;</label>
+        <input type="date" id="startDateInput" required>
+      </div>
+      <label class="form-label" style="margin-left: 10px;">Do:&nbsp;
+        <input type="date" id="endDateInput" required>
+        &nbsp;
+      </label>
+      <h1></h1>
+      <button class="btn btn-primary" type="button" onclick="searchOrders()">Wyszukaj</button>
+      </br>
+      <input type="checkbox" id="showOnlyUnchecked" onchange="searchOrders()">
+      <label for="showOnlyUnchecked">Wyświetl tylko brakujące materiały</label>
+      <div style="text-align:center;">
+        <section class="py-5 bg-light">
+          <div class="container">
+            <ul id="resultList" style="width: 30%; margin: auto;">
+
+            </ul>
+          </div>
+        </section>
+      </div>
+
+    </div>
+
+  </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+</div>
+<script src="/static/bootstrap/js/bootstrap.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.15/js/dataTables.bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/jquery.tablesorter.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/widgets/widget-filter.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/widgets/widget-storage.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="/static/js/Ludens---1-Dark-mode-Index-Table-with-Search-Filters-1.js"></script>
+<script src="/static/js/Ludens---1-Dark-mode-Index-Table-with-Search-Filters-2.js"></script>
+<script src="/static/js/Ludens---1-Dark-mode-Index-Table-with-Search-Filters.js"></script>
+<script src="/static/js/theme.js"></script>
+</body>
+<script>
+  $.get("/user", function(data) {
+    $("#user").html(data.name);
+    for(let i=data.notifications.length-1;i>=0;i--){
+      var t = `<a class="dropdown-item d-flex align-items-center" href="#">
+                                            <div class="me-3">
+                                                <div class="bg-warning icon-circle"><i class="fas fa-exclamation-triangle text-white"></i></div>
+                                            </div>
+                                           <div><span class="small text-gray-500">`+data.notifications[i].creator + " " +data.notifications[i].date+`</span>
+                                                <p>`+data.notifications[i].description+`</p>
+                                            </div>
+                                        </a>`
+
+      $('#notification').append(t)
+    }
+    $('#alertamount').text(data.notifications.length);
+  });
+</script>
+<script>
+  function searchOrders() {
+    var startDate = document.getElementById('startDateInput').value;
+    var endDate = document.getElementById('endDateInput').value;
+    var showOnlyUnchecked = document.getElementById('showOnlyUnchecked').checked;
+
+    $.ajax({
+      type: "GET",
+      url: "/order/search",
+      data: {
+        fromDate: startDate,
+        toDate: endDate
+      },
+      success: function (data) {
+
+        updateResultList(data, showOnlyUnchecked);
+      },
+      error: function () {
+        console.error("Błąd podczas pobierania danych z API.");
+      }
+    });
+  }
+
+  function updateResultList(orders, showOnlyUnchecked) {
+    var resultList = document.getElementById('resultList');
+
+    resultList.innerHTML = '';
+
+    orders.sort(function (a, b) {
+      var nameA = a.description.toUpperCase();
+      var nameB = b.description.toUpperCase();
+      if (nameA < nameB) {
+        return -1;
+      }
+      if (nameA > nameB) {
+        return 1;
+      }
+      return 0;
+    });
+
+    orders.forEach(function (order) {
+
+      if (order.materials.length > 0 && order.materials.some(material => !showOnlyUnchecked || !material.checked)) {
+        var listItem = document.createElement('li');
+
+        listItem.className = 'list-group-item list-group-item-primary mb-4';
+        listItem.style.listStyleType = 'none';
+
+        var orderText = order.description ? '<strong style="font-size: 24px;">' + order.description + '</strong>' : 'Brak opisu zlecenia';
+        listItem.innerHTML = orderText;
+
+        var originalMaterialsOrder = order.materials.slice();
+
+        order.materials.sort(function (a, b) {
+          var nameA = a.item.toUpperCase();
+          var nameB = b.item.toUpperCase();
+          if (nameA < nameB) {
+            return -1;
+          }
+          if (nameA > nameB) {
+            return 1;
+          }
+          return 0;
+        });
+
+        var materialsList = document.createElement('ul');
+        materialsList.className = 'list-group';
+
+        order.materials.forEach(function (material, index) {
+
+          if (!showOnlyUnchecked || !material.checked) {
+            var materialItem = document.createElement('li');
+
+            var originalMaterial = originalMaterialsOrder.find(original => original.id === material.id);
+            var originalChecked = originalMaterial ? originalMaterial.checked : false;
+
+            if (originalChecked) {
+              materialItem.className = 'list-group-item list-group-item-action list-group-item-success';
+            } else {
+              materialItem.className = 'list-group-item list-group-item-action list-group-item-danger';
+            }
+
+            if (originalChecked) {
+              material.item += ' (posiadane)';
+            }
+
+            materialItem.addEventListener('click', function () {
+
+              updateMaterialCheckedState(material.id, !originalChecked);
+            });
+
+            materialItem.innerText = material.item;
+
+            materialsList.appendChild(materialItem);
+          }
+        });
+
+        listItem.appendChild(materialsList);
+        resultList.appendChild(listItem);
+      }
+    });
+  }
+
+  function updateMaterialCheckedState(materialId, checked) {
+
+    $.ajax({
+      type: "PATCH",
+      url: "/material/" + materialId,
+      contentType: "application/json",
+      data: JSON.stringify({ checked: checked }),
+      success: function () {
+
+        searchOrders();
+      },
+      error: function () {
+        console.error("Błąd podczas aktualizacji wartości checked w API.");
+      }
+    });
+  }
+</script>
+<script>
+  function deleteAlerts(){
+
+    $.ajax({
+      url: "/removeAlerts",
+      type: "DELETE",
+      success: function() {
+
+        location.reload()
+      },
+      error: function() {
+
+      }
+    });
+
+  }
+</script>
+
+</html>

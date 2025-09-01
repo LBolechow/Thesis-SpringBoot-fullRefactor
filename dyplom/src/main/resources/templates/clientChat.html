@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Panel wiadomości klienta</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/static/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/fonts/fontawesome5-overrides.min.css">
+    <link rel="stylesheet" href="/static/assets/css/Add-Another-Button.css">
+    <link rel="stylesheet" href="/static/css/Bootstrap-Calendar.css">
+    <link rel="stylesheet" href="/static/css/Bootstrap-Chat.css">
+    <link rel="stylesheet" href="/static/css/Box-panels-box-panel.css">
+    <link rel="stylesheet" href="/static/css/Box-panels.css">
+    <link rel="stylesheet" href="/static/css/Navbar-With-Button-icons.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.2/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <link rel="stylesheet" href="/static/css/Simple-Bootstrap-Chat.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+</head>
+<style>
+    .bg-custom-orange {
+        background-color: var(--bs-orange);
+    }
+    #send-button {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 0;
+        padding: 10px 20px;
+		height: 100%;
+		align-items: center;
+    }
+    .message-content {
+        word-wrap: break-word;
+    }
+    .bootstrap_chat {
+        background-color: transparent;
+        min-height: 100vh;
+    }
+
+</style>
+<body id="page-top">
+<div id="wrapper">
+    <div class="d-flex flex-column" id="content-wrapper">
+        <div id="content" style="text-align: center;font-family: ABeeZee, sans-serif;font-size: 18px;height: 1080px;">
+            <nav class="navbar navbar-light navbar-expand-md sticky-top bg-dark shadow mb-4 topbar static-top" style="background: var(--bs-dark);">
+                <div class="container-fluid"><button class="btn btn-link d-md-none rounded-circle me-3" id="sidebarToggleTop" type="button"><i class="fas fa-bars"></i></button><span></span><a class="navbar-brand" href="#" style="font-size: 30px;color:  var(--bs-orange);">Zakład krawiecki</a>
+                    <div class="collapse navbar-collapse">
+                        <ul class="navbar-nav">
+                            <li class="nav-item"><a class="nav-link" href="http://localhost:8080/index">Moje zlecenia</a></li>
+                            <li class="nav-item"><a class="nav-link" href="http://localhost:8080/price_list">Cennik</a></li>
+                        </ul>
+                    </div><button data-bs-target="#" data-bs-toggle="collapse" class="navbar-toggler"></button>
+                    <form class="d-none d-sm-inline-block me-auto ms-md-3 my-2 my-md-0 mw-100 navbar-search">
+                        <div class="input-group"></div>
+                    </form>
+                    <ul class="navbar-nav flex-nowrap ms-auto">
+                        <li class="nav-item dropdown d-sm-none no-arrow"><a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#"><i class="fas fa-search"></i></a>
+                            <div class="dropdown-menu dropdown-menu-end p-3 animated--grow-in" aria-labelledby="searchDropdown">
+                                <form class="me-auto navbar-search w-100">
+                                    <div class="input-group"><input class="bg-light form-control border-0 small" type="text" placeholder="Search for ...">
+                                        <div class="input-group-append"><button class="btn btn-primary py-0" type="button"><i class="fas fa-search"></i></button></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </li>
+                        <li class="nav-item dropdown no-arrow mx-1">
+                            <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#"><span id="alertamount" class="badge bg-danger badge-counter">3+</span><i class="fas fa-bell fa-fw"></i></a>
+                                <div style="height: 650px; overflow: auto;" id="notification" class="dropdown-menu dropdown-menu-end dropdown-list animated--grow-in">
+                                    <h6 class="dropdown-header">Powiadomienia</h6><a class="dropdown-item text-center small text-gray-500" onclick="deleteAlerts()" href="#">Usuń wszystkie powiadomienia</a>
+                                </div>
+                            </div>
+                        </li>
+                        <div class="d-none d-sm-block topbar-divider"></div>
+                        <li class="nav-item dropdown no-arrow">
+                            <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#"><span id="user" class="d-none d-lg-inline me-2 text-gray-600 small"></span><img class="border rounded-circle img-profile" src="/static/img/avatars/avatar1.png"></a>
+                                <div class="dropdown-menu shadow dropdown-menu-end animated--grow-in"><a class="dropdown-item" href="/profile"><i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Profil</a>
+                                    <div class="dropdown-divider"></div><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Wyloguj</a>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+                <h1></h1><div class="bootstrap_chat">
+<div class="container py-5 px-4">
+  <!-- For demo purpose-->
+  <header class="text-center">
+    <h1 class="display-4 text-dark">Napisz do pracownika!</h1>
+  </header>
+
+ 
+    <!-- Chat Box-->
+    <div class="col-12 px-0 mx-auto" style="max-width: 800px;">
+        <div id="chat-box" class="px-4 py-5 chat-box bg-dark text-light">
+            <!-- Messages will be displayed here -->
+        </div>
+</div>
+
+
+      <!-- Typing area -->
+  <div class="input-group mx-auto" style="max-width: 800px;">
+    <input id="message-input" type="text" placeholder="Wpisz wiadomość" class="form-control rounded-0 border-0 py-4 bg-light">
+    <div class="input-group-append">
+        <button id="send-button" type="button" class="btn btn-link text-dark" style="background: var(--bs-orange);">Wyślij</button>
+    </div>
+</div>
+
+    </div>
+  </div>
+</div>
+</div>
+            </div>
+        </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+    </div>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/js/Table-With-Search.js"></script>
+    <script src="/static/js/theme.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+</body>
+<script>
+    var stompClient = null;
+    var clientId;
+    var clientName;
+    var clientEmail;
+
+    $.get("/user", function(data) {
+        $("#user").html(data.name);
+        clientId = data.id;
+        clientName = data.name;
+        clientEmail = data.email;
+        for(let i=data.notifications.length-1;i>=0;i--){
+            var t = `<a class="dropdown-item d-flex align-items-center" href="#">
+                                            <div class="me-3">
+                                                <div class="bg-warning icon-circle"><i class="fas fa-exclamation-triangle text-white"></i></div>
+                                            </div>
+                                            <div><span class="small text-gray-500">`+data.notifications[i].creator + " " +data.notifications[i].date+`</span>
+                                                <p>`+data.notifications[i].description+`</p>
+                                            </div>
+                                        </a>`
+
+            $('#notification').append(t)
+        }
+        $('#alertamount').text(data.notifications.length);
+        connect(clientId);
+    });
+    function scrollToBottom() {
+        var chatBox = $('#chat-box');
+        chatBox.scrollTop(chatBox[0].scrollHeight);
+    }
+    function connect(clientId) {
+        var socket = new SockJS('/ws-chat');
+        stompClient = Stomp.over(socket);
+        console.log(clientId)
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/topic/employees', function (message) {
+
+                console.log('Received message:', message);
+                showMessage(JSON.parse(message.body));
+            });
+
+            getClientConversation();
+        });
+    }
+
+    function sendMessageToEmployees(clientId, clientName, clientEmail) {
+        console.log(clientId + clientName + clientEmail);
+
+        var message = {
+            sender: {
+                id: clientId,
+                name: clientName,
+                email: clientEmail
+            },
+            content: $('#message-input').val(),
+            dateMessage: new Date()
+        };
+
+        stompClient.send('/app/sendToEmployees', {}, JSON.stringify(message));
+        markConversationsAsUnread(clientId);
+    }
+
+    function getClientConversation() {
+
+        $.ajax({
+            url: '/api/conversation',
+            method: 'GET',
+            success: function (data) {
+
+                console.log('Fetched conversation data:', data);
+
+                $('#chat-box').empty();
+
+                data.forEach(function (message) {
+                    showMessage(message);
+                });
+            },
+            error: function (error) {
+                console.error('Error fetching conversation data:', error);
+            }
+        });
+    }
+
+    $(function () {
+        $('#send-button').click(function () {
+            sendMessageToEmployees(clientId, clientName, clientEmail);
+            $('#message-input').val('');
+        });
+    });
+
+    function showMessage(message) {
+
+        var isCurrentUserMessage = message.sender.id === clientId;
+
+        var messageElement = `
+        <div class="media w-50 mb-3 ${isCurrentUserMessage ? 'ml-auto' : ''}">
+            <div class="media-body ${isCurrentUserMessage ? 'text-right' : 'ml-3'}">
+                <div class="mb-2">
+                    <p class="text-small mb-0 text-muted">${message.sender.name}</p>
+                </div>
+                <div class="bg-light rounded py-2 px-3 message-content">
+                    <p class="mb-0 text-dark">${message.content}</p>
+                </div>
+                <p class="small text-muted">${message.formattedMessageDate}</p>
+            </div>
+        </div>
+    `;
+
+        if (!isCurrentUserMessage) {
+            messageElement = messageElement.replace('bg-light', 'bg-custom-orange text-white');
+        }
+
+        $('#chat-box').append(messageElement);
+        scrollToBottom();
+        console.log('Message element:', messageElement);
+    }
+</script>
+<script>
+    function deleteAlerts(){
+
+        $.ajax({
+            url: "/removeAlerts",
+            type: "DELETE",
+            success: function() {
+
+                location.reload()
+            },
+            error: function() {
+
+            }
+        });
+
+    }
+</script>
+
+</html>

@@ -15,6 +15,5 @@ For the original version, see [Old version](https://github.com/LBolechow/Praca-d
 - **Separated Constants & Magic Strings:** All reusable messages and constants moved to dedicated classes for better maintainability.
 ### Improvements in Progress
 - **Integration and unit tests**  
-- **Frontend changes:** The previous jQuery-based frontend is now obsolete due to backend refactoring. A new frontend will be developed using Angular.
 - **Code optimization: Refactored and streamlined code for better readability, maintainability, and performance.**
 

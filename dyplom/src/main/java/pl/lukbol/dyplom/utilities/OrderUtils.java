@@ -22,7 +22,7 @@ import pl.lukbol.dyplom.repositories.UserRepository;
 import java.text.ParseException;
 import java.time.*;
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 @Component
@@ -32,12 +32,12 @@ public class OrderUtils {
     public enum UserRoles {
         ROLE_ADMIN, ROLE_EMPLOYEE, ROLE_CLIENT
     }
+
     public static final ZoneId WARSAW_ZONE = ZoneId.of("Europe/Warsaw");
+
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
-
     private final MaterialRepository materialRepository;
-
 
     public boolean isWorkingDay(Calendar calendar) {
         int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
@@ -45,36 +45,29 @@ public class OrderUtils {
     }
 
     public List<User> findAvailableUsersWithEndDateTime(Date taskStartDateTime, Date taskEndDateTime, int durationMinutes) {
+        if (taskStartDateTime == null || taskEndDateTime == null) {
+            throw new IllegalArgumentException("taskStartDateTime i taskEndDateTime nie mogą być null");
+        }
+
         List<String> roleNamesToSearch = Arrays.asList(UserRoles.ROLE_EMPLOYEE.name(), UserRoles.ROLE_ADMIN.name());
-
         List<User> availableUsers = new ArrayList<>();
-        List<User> allUsers = userRepository.findAll();
 
-        for (User user : allUsers) {
-            boolean isAvailable = true;
+        for (User user : userRepository.findAll()) {
+            if (user.getRole() == null || !roleNamesToSearch.contains(user.getRole().getName())) {
+                continue;
+            }
 
-            if (user.getRole() != null && roleNamesToSearch.contains(user.getRole().getName())) {
+            List<Order> userOrders = orderRepository
+                    .findByEmployeeNameAndEndDateAfterAndStartDateBefore(
+                            user.getName(), taskStartDateTime, taskEndDateTime
+                    );
 
-                List<Order> userOrders = orderRepository
-                        .findByEmployeeNameAndEndDateAfterAndStartDateBefore(
-                                user.getName(), taskStartDateTime, taskEndDateTime
-                        );
+            boolean isAvailable = userOrders.stream().noneMatch(order ->
+                    hasTimeOverlap(taskStartDateTime, taskEndDateTime, order.getStartDate(), order.getEndDate())
+            );
 
-                for (Order order : userOrders) {
-                    Date orderStartDate = order.getStartDate();
-                    Date orderEndDate = order.getEndDate();
-
-                    if ((taskEndDateTime.after(orderStartDate) && taskEndDateTime.before(orderEndDate)) ||
-                            (taskStartDateTime.after(orderStartDate) && taskStartDateTime.before(orderEndDate)) ||
-                            (taskStartDateTime.before(orderStartDate) && taskEndDateTime.after(orderEndDate))) {
-                        isAvailable = false;
-                        break;
-                    }
-                }
-
-                if (isAvailable) {
-                    availableUsers.add(user);
-                }
+            if (isAvailable) {
+                availableUsers.add(user);
             }
         }
 
@@ -82,42 +75,71 @@ public class OrderUtils {
     }
 
     public List<User> findAvailableUserWithEndDateTime(Long employeeId, Date taskStartDateTime, Date taskEndDateTime, int durationMinutes) {
-        List<String> roleNamesToSearch = Arrays.asList(UserRoles.ROLE_EMPLOYEE.name(), UserRoles.ROLE_ADMIN.name());
+        if (taskStartDateTime == null || taskEndDateTime == null) {
+            throw new IllegalArgumentException("taskStartDateTime i taskEndDateTime nie mogą być null");
+        }
 
+        List<String> roleNamesToSearch = Arrays.asList(UserRoles.ROLE_EMPLOYEE.name(), UserRoles.ROLE_ADMIN.name());
         List<User> availableUsers = new ArrayList<>();
 
-        Optional<User> optionalUser = userRepository.findById(employeeId);
-
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            boolean isAvailable = true;
-
+        userRepository.findById(employeeId).ifPresent(user -> {
             if (user.getRole() != null && roleNamesToSearch.contains(user.getRole().getName())) {
-
                 List<Order> userOrders = orderRepository
                         .findByEmployeeNameAndEndDateAfterAndStartDateBefore(
                                 user.getName(), taskStartDateTime, taskEndDateTime
                         );
 
-                for (Order order : userOrders) {
-                    Date orderStartDate = order.getStartDate();
-                    Date orderEndDate = order.getEndDate();
-
-                    if ((taskEndDateTime.after(orderStartDate) && taskEndDateTime.before(orderEndDate)) ||
-                            (taskStartDateTime.after(orderStartDate) && taskStartDateTime.before(orderEndDate)) ||
-                            (taskStartDateTime.before(orderStartDate) && taskEndDateTime.after(orderEndDate))) {
-                        isAvailable = false;
-                        break;
-                    }
-                }
+                boolean isAvailable = userOrders.stream().noneMatch(order ->
+                        hasTimeOverlap(taskStartDateTime, taskEndDateTime, order.getStartDate(), order.getEndDate())
+                );
 
                 if (isAvailable) {
                     availableUsers.add(user);
                 }
             }
-        }
+        });
 
         return availableUsers;
+    }
+
+    public List<User> findAvailableUsersWithoutEmployee(Long orderId, Date taskStartDateTime, Date taskEndDateTime, int durationMinutes) {
+        if (taskStartDateTime == null || taskEndDateTime == null) {
+            throw new IllegalArgumentException("taskStartDateTime i taskEndDateTime nie mogą być null");
+        }
+
+        List<String> roleNamesToSearch = Arrays.asList(UserRoles.ROLE_EMPLOYEE.name(), UserRoles.ROLE_ADMIN.name());
+        List<User> availableUsers = new ArrayList<>();
+
+        orderRepository.findById(orderId).ifPresent(order -> {
+            String employeeNameOnOrder = order.getEmployeeName();
+            List<User> allUsersExceptEmployee = userRepository.findAllByNameNot(employeeNameOnOrder);
+
+            for (User user : allUsersExceptEmployee) {
+                if (user.getRole() == null || !roleNamesToSearch.contains(user.getRole().getName())) {
+                    continue;
+                }
+
+                List<Order> userOrders = orderRepository.findByEmployeeNameAndEndDateAfterAndStartDateBefore(
+                        user.getName(), taskStartDateTime, taskEndDateTime
+                );
+
+                boolean isAvailable = userOrders.stream().noneMatch(userOrder ->
+                        hasTimeOverlap(taskStartDateTime, taskEndDateTime, userOrder.getStartDate(), userOrder.getEndDate())
+                );
+
+                if (isAvailable) {
+                    availableUsers.add(user);
+                }
+            }
+        });
+
+        return availableUsers;
+    }
+
+    private boolean hasTimeOverlap(Date start1, Date end1, Date start2, Date end2) {
+        return (end1.after(start2) && end1.before(end2)) ||
+                (start1.after(start2) && start1.before(end2)) ||
+                (start1.before(start2) && end1.after(end2));
     }
 
     public boolean isAdmin(Authentication authentication) {
@@ -126,72 +148,31 @@ public class OrderUtils {
     }
 
     public DateRange convertToDateRange(LocalDate fromDate, LocalDate toDate) {
-        LocalDateTime startDateTime = LocalDateTime.of(fromDate, LocalTime.MIN);
-        LocalDateTime endDateTime = LocalDateTime.of(toDate, LocalTime.MAX);
-
         return new DateRange(
-                Date.from(startDateTime.atZone(ZoneId.systemDefault()).toInstant()),
-                Date.from(endDateTime.atZone(ZoneId.systemDefault()).toInstant())
+                Date.from(LocalDateTime.of(fromDate, LocalTime.MIN).atZone(ZoneId.systemDefault()).toInstant()),
+                Date.from(LocalDateTime.of(toDate, LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant())
         );
     }
 
+    // FIX: zmieniono "In progress" -> "W trakcie" żeby zgadzało się z wartościami w bazie
     public List<Order> filterInProgressOrders(List<Order> orders) {
         return orders.stream()
-                .filter(order -> "In progress".equals(order.getStatus()))
+                .filter(order -> "W trakcie".equals(order.getStatus()))
                 .collect(Collectors.toList());
     }
 
-    public List<User> findAvailableUsersWithoutEmployee(Long orderId, Date taskStartDateTime, Date taskEndDateTime, int durationMinutes) {
-        List<String> roleNamesToSearch = Arrays.asList(UserRoles.ROLE_EMPLOYEE.name(), UserRoles.ROLE_ADMIN.name());
-        List<User> availableUsers = new ArrayList<>();
-
-        Optional<Order> optionalOrder = orderRepository.findById(orderId);
-
-        if (optionalOrder.isPresent()) {
-            Order order = optionalOrder.get();
-            String employeeNameOnOrder = order.getEmployeeName();
-
-            List<User> allUsersExceptEmployee = userRepository.findAllByNameNot(employeeNameOnOrder);
-
-            for (User user : allUsersExceptEmployee) {
-                boolean isAvailable = true;
-
-                if (user.getRole() != null && roleNamesToSearch.contains(user.getRole().getName())) {
-
-                    List<Order> userOrders = orderRepository.findByEmployeeNameAndEndDateAfterAndStartDateBefore(
-                            user.getName(), taskStartDateTime, taskEndDateTime
-                    );
-
-                    for (Order userOrder : userOrders) {
-                        Date orderStartDate = userOrder.getStartDate();
-                        Date orderEndDate = userOrder.getEndDate();
-
-                        if ((taskEndDateTime.after(orderStartDate) && taskEndDateTime.before(orderEndDate)) ||
-                                (taskStartDateTime.after(orderStartDate) && taskStartDateTime.before(orderEndDate)) ||
-                                (taskStartDateTime.before(orderStartDate) && taskEndDateTime.after(orderEndDate))) {
-                            isAvailable = false;
-                            break;
-                        }
-                    }
-
-                    if (isAvailable) {
-                        availableUsers.add(user);
-                    }
-                }
-            }
-        }
-
-        return availableUsers;
-    }
-
+    // FIX: obsługa pustej listy zamiast IndexOutOfBoundsException
     public User findUserByName(String name) {
-        return userRepository.findByNameContainingIgnoreCase(name).get(0);
+        List<User> users = userRepository.findByNameContainingIgnoreCase(name);
+        if (users.isEmpty()) {
+            throw new ApplicationException.UserNotFoundException("Nie znaleziono użytkownika: " + name);
+        }
+        return users.get(0);
     }
 
     public void updateOrderFields(Order order, EditOrderDTO request) {
         User user = findUserByName(request.selectedUser());
-
-        order.setEmployeeName(user != null ? user.getName() : null);
+        order.setEmployeeName(user.getName());
         order.setDescription(request.description());
         order.setClientName(request.clientName());
         order.setClientEmail(request.email());
@@ -208,6 +189,7 @@ public class OrderUtils {
         order.setPrice(request.price());
         order.setStatus(request.status());
     }
+
     public void addNotificationAboutNewOrder(User user) {
         List<Notification> notifications = new ArrayList<>(user.getNotifications());
         notifications.add(new Notification(Messages.NEW_ORDER_NOTIF, new Date(), user, "System"));
@@ -221,7 +203,6 @@ public class OrderUtils {
                 .collect(Collectors.toList());
     }
 
-
     public List<Order> findOrdersForAdmin(DateRange dateRange) {
         return orderRepository.findByEndDateBetween(dateRange.start(), dateRange.end());
     }
@@ -229,7 +210,6 @@ public class OrderUtils {
     public List<Order> findOrdersForUser(String username, DateRange dateRange) {
         return orderRepository.findByEmployeeNameAndEndDateBetween(username, dateRange.start(), dateRange.end());
     }
-
 
     public OrderDTO toOrderDTO(Order order) {
         return new OrderDTO(
@@ -249,6 +229,7 @@ public class OrderUtils {
                         .toList()
         );
     }
+
     public OrderDetailsDTO buildOrderDetailsDTO(Order order) {
         List<MaterialDTO> materials = order.getMaterials().stream()
                 .map(m -> new MaterialDTO(m.getId(), m.getItem(), m.isChecked()))
@@ -269,10 +250,11 @@ public class OrderUtils {
         );
     }
 
+
     public AvailabilityDTO findNextAvailableSlot(
             Date startDate,
             double durationHours,
-            Function<Calendar, List<User>> availableUsersProvider) {
+            BiFunction<Calendar, Calendar, List<User>> availableUsersProvider) {
 
         Calendar currentDateTime = Calendar.getInstance();
         currentDateTime.setTime(startDate);
@@ -283,10 +265,7 @@ public class OrderUtils {
         int daysChecked = 0;
 
         if (currentDateTime.get(Calendar.HOUR_OF_DAY) >= WORKDAY_END_HOUR) {
-            currentDateTime.add(Calendar.DAY_OF_MONTH, 1);
-            currentDateTime.set(Calendar.HOUR_OF_DAY, START_HOUR);
-            currentDateTime.set(Calendar.MINUTE, 0);
-            currentDateTime.set(Calendar.SECOND, 0);
+            advanceToNextDayStart(currentDateTime, START_HOUR);
         }
 
         while (daysChecked < MAX_DAYS_LOOKAHEAD) {
@@ -296,32 +275,25 @@ public class OrderUtils {
                 endDateTime.add(Calendar.MINUTE, durationMinutes);
 
                 if (endDateTime.get(Calendar.HOUR_OF_DAY) > WORKDAY_END_HOUR) {
-                    currentDateTime.add(Calendar.DAY_OF_MONTH, 1);
-                    currentDateTime.set(Calendar.HOUR_OF_DAY, START_HOUR);
-                    currentDateTime.set(Calendar.MINUTE, 0);
-                    currentDateTime.set(Calendar.SECOND, 0);
+                    advanceToNextDayStart(currentDateTime, START_HOUR);
                     daysChecked++;
                     continue;
                 }
 
-                List<User> availableUsers = availableUsersProvider.apply(currentDateTime);
+                List<User> availableUsers = availableUsersProvider.apply(currentDateTime, endDateTime);
 
                 if (!availableUsers.isEmpty()) {
-                    User suggestedUser = availableUsers.get(0);
                     return new AvailabilityDTO(
                             true,
                             "Termin dostępny",
                             DateUtils.formatDateTime(currentDateTime),
                             DateUtils.formatDateTime(endDateTime),
-                            suggestedUser.getName()
+                            availableUsers.get(0).getName()
                     );
                 }
             }
 
-            currentDateTime.add(Calendar.DAY_OF_MONTH, 1);
-            currentDateTime.set(Calendar.HOUR_OF_DAY, START_HOUR);
-            currentDateTime.set(Calendar.MINUTE, 0);
-            currentDateTime.set(Calendar.SECOND, 0);
+            advanceToNextDayStart(currentDateTime, START_HOUR);
             daysChecked++;
         }
 
@@ -333,12 +305,16 @@ public class OrderUtils {
                 null
         );
     }
-    public void updateOrderMaterials(Order order, List<String> items) {
-        materialRepository.deleteAllByOrder(order);
-        List<Material> materials = createMaterialsForOrder(items, order);
-        order.setMaterials(materials);
+
+    private void advanceToNextDayStart(Calendar calendar, int startHour) {
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, startHour);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
     }
 
-
-
+    public void updateOrderMaterials(Order order, List<String> items) {
+        materialRepository.deleteAllByOrder(order);
+        order.setMaterials(createMaterialsForOrder(items, order));
+    }
 }

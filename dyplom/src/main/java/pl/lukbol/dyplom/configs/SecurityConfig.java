@@ -63,7 +63,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
-                        .successHandler(oAuth2SuccessHandler) // ← DODAJ TĘ LINIĘ
+                        .successHandler(oAuth2SuccessHandler)
                 );
         http.addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
 

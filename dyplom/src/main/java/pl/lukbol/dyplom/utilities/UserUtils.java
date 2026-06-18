@@ -24,7 +24,7 @@ public class UserUtils {
 
     private final ConversationRepository conversationRepository;
 
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
 
     public void sendResetEmail(String to, String newPassword) {

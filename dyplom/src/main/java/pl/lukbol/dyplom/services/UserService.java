@@ -43,7 +43,7 @@ public class UserService {
     @Transactional
     public ApiResponseDTO addUser(AddUserDTO addUserDTO) {
         if (userUtils.emailExists(addUserDTO.email())) {
-            throw new ApplicationException.UserWithEmailAlreadyExistsException(Messages.USER_ADD_SUCCESS);
+            throw new ApplicationException.UserWithEmailAlreadyExistsException(Messages.EMAIL_ADDRES_ALREADY_EXIST);
         }
 
         User newUser = userUtils.createUser(addUserDTO.name(), addUserDTO.email(), addUserDTO.password());

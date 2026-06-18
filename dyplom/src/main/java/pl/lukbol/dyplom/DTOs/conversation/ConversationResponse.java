@@ -1,4 +1,4 @@
-package pl.lukbol.dyplom.records;
+package pl.lukbol.dyplom.DTOs.conversation;
 
 public record ConversationResponse(
         boolean success,

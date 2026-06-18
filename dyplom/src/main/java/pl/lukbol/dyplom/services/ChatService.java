@@ -12,7 +12,7 @@ import pl.lukbol.dyplom.classes.Conversation;
 import pl.lukbol.dyplom.classes.Message;
 import pl.lukbol.dyplom.classes.User;
 import pl.lukbol.dyplom.exceptions.ApplicationException;
-import pl.lukbol.dyplom.records.ConversationResponse;
+import pl.lukbol.dyplom.DTOs.conversation.ConversationResponse;
 import pl.lukbol.dyplom.repositories.ConversationRepository;
 import pl.lukbol.dyplom.repositories.MessageRepository;
 import pl.lukbol.dyplom.repositories.UserRepository;

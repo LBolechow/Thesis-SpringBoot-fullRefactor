@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import pl.lukbol.dyplom.classes.Privilege;
 import pl.lukbol.dyplom.classes.Role;
 import pl.lukbol.dyplom.classes.User;
+import pl.lukbol.dyplom.common.Messages;
 import pl.lukbol.dyplom.repositories.RoleRepository;
 import pl.lukbol.dyplom.repositories.UserRepository;
 
@@ -32,13 +33,17 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
+
+    private final SecureRandom random = new SecureRandom();
+
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oauthUser = new DefaultOAuth2UserService().loadUser(userRequest);
+        OAuth2User oauthUser = delegate.loadUser(userRequest);
 
         String email = oauthUser.getAttribute(EMAIL_ATTR);
         if (email == null) {
-            throw new OAuth2AuthenticationException("Email not found in OAuth2 response");
+            throw new OAuth2AuthenticationException(Messages.OAUTH_EMAIL_NOT_FOUND);
         }
 
         User user = userRepository.findOptionalByEmail(email)
@@ -80,7 +85,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     }
 
     private String generateRandomPassword() {
-        SecureRandom random = new SecureRandom();
         byte[] bytes = new byte[12];
         random.nextBytes(bytes);
         return Base64.getEncoder().encodeToString(bytes);

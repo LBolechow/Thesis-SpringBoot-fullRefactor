@@ -38,8 +38,9 @@ public class PriceService {
 
     @Transactional
     public ApiResponseDTO deletePrice(Long id) {
-        Optional<Price> priceOptional = priceRepository.findById(id);
-        priceRepository.delete(priceOptional.get());
+        Price price = priceRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException.OrderNotFoundException(Messages.ORDER_NOT_FOUND));
+        priceRepository.delete(price);
         return new ApiResponseDTO(Messages.PRICE_DELETE_MESSAGE);
     }
 

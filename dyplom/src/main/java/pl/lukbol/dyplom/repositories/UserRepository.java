@@ -13,11 +13,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     User findByEmail(String email);
 
 
-    User deleteUserById(Long id);
-
     Optional<User> findOptionalByEmail(String email);
 
-    Boolean existsByEmail(String email);
 
     @EntityGraph(attributePaths = "roles")
     List<User> findAll();

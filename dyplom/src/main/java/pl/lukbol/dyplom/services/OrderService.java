@@ -37,15 +37,16 @@ import static pl.lukbol.dyplom.utilities.OrderUtils.WARSAW_ZONE;
 @RequiredArgsConstructor
 public class OrderService {
 
-
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final MaterialRepository materialRepository;
     private final OrderUtils orderUtils;
+
     public CurrentDateDTO getCurrentDate() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         return new CurrentDateDTO(sdf.format(new Date()));
     }
+
     @Transactional
     public ApiResponseDTO addOrder(AddOrderDTO request) {
         User user = orderUtils.findUserByName(request.selectedUser());
@@ -77,10 +78,9 @@ public class OrderService {
 
         List<Material> materials = orderUtils.createMaterialsForOrder(request.items(), newOrder);
         newOrder.setMaterials(materials);
-
         orderRepository.save(newOrder);
 
-       return new ApiResponseDTO(Messages.NEW_ORDER_NOTIF);
+        return new ApiResponseDTO(Messages.NEW_ORDER_NOTIF);
     }
 
     public List<OrderDTO> getDailyOrders(Authentication authentication, OrderRequestByDateDTO orderRequestDTO) {
@@ -96,22 +96,7 @@ public class OrderService {
                 : orderUtils.findOrdersForUser(user.getName(), dateRange);
 
         return orders.stream()
-                .map(order -> new OrderDTO(
-                        order.getId(),
-                        order.getDescription(),
-                        order.getClientName(),
-                        order.getClientEmail(),
-                        order.getPhoneNumber(),
-                        order.getDuration(),
-                        order.getStartDate().toString(),
-                        order.getEndDate().toString(),
-                        order.getEmployeeName(),
-                        order.getPrice(),
-                        order.getStatus(),
-                        order.getMaterials().stream()
-                                .map(m -> new MaterialDTO(m.getId(), m.getItem(), m.isChecked()))
-                                .toList()
-                ))
+                .map(orderUtils::toOrderDTO)
                 .toList();
     }
 
@@ -128,15 +113,11 @@ public class OrderService {
                 .toList();
     }
 
-
-
     public OrderDetailsDTO getOrderDetails(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException.OrderNotFoundException(Messages.ORDER_NOT_FOUND));
-
         return orderUtils.buildOrderDetailsDTO(order);
     }
-
 
     @Transactional
     public ApiResponseDTO editOrder(Long id, EditOrderDTO request) {
@@ -145,11 +126,12 @@ public class OrderService {
 
         orderUtils.updateOrderFields(order, request);
         orderUtils.updateOrderMaterials(order, request.items());
-
         orderRepository.save(order);
 
         return new ApiResponseDTO(Messages.ORDER_UPDATED_NOTIF);
     }
+
+    // FIX: lambdy teraz dostarczają endDateTime do metod findAvailable*
     public AvailabilityDTO checkAvailability(double durationHours, int startHour) {
         Calendar now = Calendar.getInstance();
         now.set(Calendar.HOUR_OF_DAY, startHour);
@@ -159,14 +141,14 @@ public class OrderService {
         return orderUtils.findNextAvailableSlot(
                 now.getTime(),
                 durationHours,
-                current -> orderUtils.findAvailableUsersWithEndDateTime(
+                (current, end) -> orderUtils.findAvailableUsersWithEndDateTime(
                         current.getTime(),
-                        null,
+                        end.getTime(),
                         (int) (durationHours * 60)
                 )
         );
-
     }
+
     public AvailabilityDTO checkAvailabilityNextDay(Long orderId, double durationHours) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ApplicationException.OrderNotFoundException("Zamówienie nie znalezione"));
@@ -174,12 +156,18 @@ public class OrderService {
         return orderUtils.findNextAvailableSlot(
                 order.getEndDate(),
                 durationHours,
-                current -> {
+                (current, end) -> {
                     User user = userRepository.findByName(order.getEmployeeName());
-                    return orderUtils.findAvailableUserWithEndDateTime(user.getId(), current.getTime(), /*endDateTime*/ null, (int) (durationHours * 60));
+                    return orderUtils.findAvailableUserWithEndDateTime(
+                            user.getId(),
+                            current.getTime(),
+                            end.getTime(),
+                            (int) (durationHours * 60)
+                    );
                 }
         );
     }
+
     public AvailabilityDTO checkAvailabilityOtherEmployee(Long orderId, double durationHours) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ApplicationException.OrderNotFoundException("Zamówienie nie znalezione"));
@@ -187,10 +175,14 @@ public class OrderService {
         return orderUtils.findNextAvailableSlot(
                 order.getEndDate(),
                 durationHours,
-                current -> orderUtils.findAvailableUsersWithoutEmployee(order.getId(), current.getTime(), /*endDateTime*/ null, (int) (durationHours * 60))
+                (current, end) -> orderUtils.findAvailableUsersWithoutEmployee(
+                        order.getId(),
+                        current.getTime(),
+                        end.getTime(),
+                        (int) (durationHours * 60)
+                )
         );
     }
-
 
     @Transactional
     public ApiResponseDTO deleteOrder(Long id) {
@@ -202,7 +194,6 @@ public class OrderService {
         }
 
         orderRepository.delete(order);
-
         return new ApiResponseDTO(Messages.ORDER_DELETED);
     }
 
@@ -214,12 +205,12 @@ public class OrderService {
         List<Order> matchingOrders = isAdmin
                 ? orderRepository.findByStartDateBetweenWithMaterials(dateRange.start(), dateRange.end())
                 : orderRepository.findByEmployeeNameAndStartDateBetweenWithMaterials(
-                userRepository.findByEmail(userEmail).getName(), dateRange.start(), dateRange.end());
+                userRepository.findByEmail(userEmail).getName(),
+                dateRange.start(),
+                dateRange.end()
+        );
 
-        List<Order> filteredOrders = orderUtils.filterInProgressOrders(matchingOrders);
-
-
-        return filteredOrders.stream()
+        return orderUtils.filterInProgressOrders(matchingOrders).stream()
                 .map(orderUtils::toOrderDTO)
                 .toList();
     }
@@ -236,8 +227,6 @@ public class OrderService {
 
         return new ApiResponseDTO(Messages.MATERIAL_UPDATED);
     }
-
-
 
     private DateRange parseDateRange(String start, String end) {
         if (start == null || end == null) {
@@ -262,7 +251,4 @@ public class OrderService {
             );
         }
     }
-
 }
-
-

@@ -11,37 +11,66 @@ import java.util.List;
 @NoArgsConstructor
 public class SecurityPaths {
     public static final List<String> skipFilterUrls = List.of(
-            "/register", "/error", "/webjars/**", "/githubprivacyerror.html", "/css/**",
-            "/static/**", "/images/**", "/fonts/**", "/scripts/**", "/error", "/login",
-            "/", "/user2", "/favicon", "/usersonline", "/user/profile/{id}", "/get_message",
-            "/favicon.ico", "/price_list", "/locked", "/api/conversation", "/ordersList",
-            "/order", "/order/**", "/order/checkOrder/{idCode}", "/prices", "/send-new-password");
+            "/api/auth/login",
+            "/register",
+            "/send-new-password",
+            "/prices",
+            "/order/checkOrder/**",
+            "/error"
+    );
     public final String[] CLIENT_EMPLOYEE_ADMIN_PATHS = {
-            "/user", "/profile/**", "/currentDate", "/clientChat", "/ws-chat/**", "/ws-chat",
-            "/api/conversation", "/sendToEmployees", "/topic/employees", "/app", "/topic/**",
-            "/employeeChat", "/conversation/**", "/sendToConversation/**",
-            "/api/conversation/**/latest-message", "/index", "/user/activateMail",
-            "/user/checkCode", "/user/orders", "/removeAlerts", "/create-notification"
+            "/user",
+            "/profile/**",
+            "/currentDate",
+            "/index",
+            "/removeAlerts",
+            "/create-notification",
+            "/ws-chat/**",
+            "/api/conversation",
+            "/conversation/**",
+            "/{conversationId}/latest-message",
+            "/markConversationAsRead/**",
+            "/checkIfConversationRead/**",
+            "/topic/**"
     };
     public final String[] ADMIN_PATHS = {
-            "/admin/**", "/search-users", "/panel_administratora", "/users/delete/**",
-            "/users/update/**", "/users/add", "/add-price", "/delete-price/{id}", "/update-price/{id}"
+            "/add",
+            "/search-users",
+            "/users/findByRole",
+            "/users/{id}",
+            "/users/update/**",
+            "/add-price",
+            "/delete-price/**",
+            "/update-price/**"
     };
     public final String[] ADMIN_EMPLOYEE_PATHS = {
-            "/order/add", "/users", "/caldendar", "/daily", "/daily/**", "/order/getDailyOrders",
-            "/users/findByRole", "/order/checkAvailability", "/order/getOrderDetails/{id}",
-            "/order/edit/{id}", "/order/checkAvailabilityNextDay", "/order/delete/{id}",
-            "/materials", "/order/search", "/material/{id}", "/order/otherEmployee/{orderId}",
-            "/user/employees-and-admins", "/users/employees-and-admins", "/api/createConversation",
-            "/api/employee/conversations", "/clearSeenByUserIds/", "/markConversationAsRead/{conversationId}",
-            "/checkIfConversationRead/{conversationId}", "/get_conversations",
-            "/getConversationParticipants/{conversationId}", "/hide/{conversationId}", "/checkSeen/{conversationId}"
+            "/order/add",
+            "/order/getDailyOrders",
+            "/order/getOrderDetails/**",
+            "/order/edit/**",
+            "/order/delete/**",
+            "/order/checkAvailability",
+            "/order/checkAvailabilityNextDay/**",
+            "/order/otherEmployee/**",
+            "/order/search",
+            "/material/**",
+            "/users/employees-and-admins",
+            "/user/employees-and-admins",
+            "/api/createConversation",
+            "/api/employee/conversations",
+            "/get_conversations",
+            "/getConversationParticipants/**",
+            "/clearSeenByUserIds/**",
+            "/checkSeen/**",
+            "/hide/**"
     };
+
     public final String[] PERMIT_ALL_PATHS = {
-            "/register", "/error", "/webjars/**", "/githubprivacyerror.html", "/css/**",
-            "/static/**", "/images/**", "/fonts/**", "/scripts/**", "/error", "/login",
-            "/", "/user2", "/favicon", "/usersonline", "/user/profile/{id}", "/get_message",
-            "/favicon.ico", "/price_list", "/locked", "/api/conversation", "/ordersList",
-            "/order", "/order/**", "/order/checkOrder/{idCode}", "/prices", "/send-new-password"
+            "/api/auth/login",
+            "/register",
+            "/send-new-password",
+            "/prices",
+            "/order/checkOrder/**",
+            "/error"
     };
 }
